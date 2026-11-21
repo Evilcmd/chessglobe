@@ -123,12 +123,48 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
     }
   }, [chess, fen, selectedSquare, interactive, boardState]);
 
-  // Clear selection if fen changes
+  // Preserve dragged piece and selection across FEN updates if the piece is still on that square
+  const prevFenRef = useRef<string>(fen);
   useEffect(() => {
-    setSelectedSquare(null);
-    setDraggedSquare(null);
-    setDragPos(null);
-  }, [fen]);
+    if (prevFenRef.current !== fen) {
+      prevFenRef.current = fen;
+
+      // At start of line (no lastMove), clear selection & drag
+      if (!lastMove) {
+        setSelectedSquare(null);
+        setDraggedSquare(null);
+        setDragPos(null);
+        return;
+      }
+
+      try {
+        const newChess = new Chess(fen);
+
+        // If currently dragging, keep holding the piece unless it was captured
+        if (draggedSquare) {
+          const piece = newChess.get(draggedSquare as Square);
+          const originalColor = boardState[draggedSquare]?.color;
+          if (!piece || (originalColor && piece.color !== originalColor)) {
+            setDraggedSquare(null);
+            setDragPos(null);
+          }
+        }
+
+        // If a square is selected, keep it selected unless it was captured
+        if (selectedSquare) {
+          const piece = newChess.get(selectedSquare as Square);
+          const originalColor = boardState[selectedSquare]?.color;
+          if (!piece || (originalColor && piece.color !== originalColor)) {
+            setSelectedSquare(null);
+          }
+        }
+      } catch (_) {
+        setSelectedSquare(null);
+        setDraggedSquare(null);
+        setDragPos(null);
+      }
+    }
+  }, [fen, lastMove, draggedSquare, selectedSquare, boardState]);
 
   // Handle square click
   const handleSquareClick = (sq: string) => {
