@@ -209,22 +209,36 @@ export function parsePgnToLines(pgn: string, repertoireName: string = 'Opening')
           return isWhite ? `${moveNumber}. ${m.san}` : m.san;
         }).join(' ');
 
-        // Try to derive a meaningful sub-line title
+        // Check if there is an explicit line title in comments (e.g. [Line 4: The bishop pair...])
         let lineTitle = '';
-        if (eventName) {
-          lineTitle = paths.length > 1 ? `${eventName} - Line ${pIdx + 1}` : eventName;
-        } else {
-          // Check if there's a comment in the first few moves that can serve as name
-          const firstCommentMove = verifiedMoves.find(m => m.comment && m.comment.length < 50);
-          if (firstCommentMove && firstCommentMove.comment) {
-            lineTitle = firstCommentMove.comment.split('\n')[0];
+        let explicitLineNum: number | undefined;
+
+        for (const m of verifiedMoves) {
+          if (m.comment) {
+            const lineMatch = m.comment.match(/\[Line\s*(\d+)[:\s]+([^\]]+)\]/i);
+            if (lineMatch) {
+              explicitLineNum = parseInt(lineMatch[1], 10);
+              lineTitle = `Line ${explicitLineNum}: ${lineMatch[2].trim()}`;
+              break;
+            }
+          }
+        }
+
+        if (!lineTitle) {
+          if (eventName) {
+            lineTitle = paths.length > 1 ? `${eventName} - Line ${pIdx + 1}` : eventName;
           } else {
-            lineTitle = `Line ${lineNum}: ${verifiedMoves.slice(0, 4).map(m => m.san).join(' ')}`;
+            const firstCommentMove = verifiedMoves.find(m => m.comment && m.comment.length < 50);
+            if (firstCommentMove && firstCommentMove.comment) {
+              lineTitle = firstCommentMove.comment.split('\n')[0];
+            } else {
+              lineTitle = `Line ${lineNum}: ${verifiedMoves.slice(0, 4).map(m => m.san).join(' ')}`;
+            }
           }
         }
 
         allExtractedLines.push({
-          id: `line-${lineNum}-${Date.now()}`,
+          id: `line-${explicitLineNum ?? lineNum}-${Date.now()}-${pIdx}`,
           name: lineTitle,
           moves: verifiedMoves,
           keyMovesSummary,
@@ -235,6 +249,16 @@ export function parsePgnToLines(pgn: string, repertoireName: string = 'Opening')
       }
     }
   }
+
+  // If explicit line numbers exist, sort lines by line number
+  allExtractedLines.sort((a, b) => {
+    const numA = a.name.match(/^Line (\d+):/i);
+    const numB = b.name.match(/^Line (\d+):/i);
+    if (numA && numB) {
+      return parseInt(numA[1], 10) - parseInt(numB[1], 10);
+    }
+    return 0;
+  });
 
   return allExtractedLines;
 }

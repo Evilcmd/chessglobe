@@ -5,6 +5,7 @@ import {
   saveRepertoires,
   createRepertoire,
   deleteRepertoire,
+  restoreDefaultPresets,
   loadEngineSettings,
   saveEngineSettings
 } from './utils/storage';
@@ -51,8 +52,19 @@ export const App: React.FC = () => {
   const handleDeleteRepertoire = (id: string) => {
     deleteRepertoire(id);
     reloadRepertoires();
-    setCurrentView('dashboard');
-    setSelectedRepId(null);
+    if (currentView === 'detail' || currentView === 'learn' || currentView === 'train') {
+      setCurrentView('dashboard');
+      setSelectedRepId(null);
+    }
+  };
+
+  const handleRestoreDefaults = () => {
+    if (confirm('Restore the 4 default openings (Jobava London, 1d4, Sicilian Kan, King\'s Indian Defense)? This will reload all 4 full courses.')) {
+      const restored = restoreDefaultPresets();
+      setRepertoires(restored);
+      setSelectedRepId(null);
+      setCurrentView('dashboard');
+    }
   };
 
   return (
@@ -77,6 +89,8 @@ export const App: React.FC = () => {
             setSelectedLineIndex(0);
             setCurrentView('train');
           }}
+          onDeleteRepertoire={handleDeleteRepertoire}
+          onRestoreDefaults={handleRestoreDefaults}
         />
       )}
 

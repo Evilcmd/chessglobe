@@ -2,6 +2,12 @@ import React, { useState, useMemo } from 'react';
 import { X, Upload, Sparkles, FileText, CheckCircle, AlertCircle } from 'lucide-react';
 import { parsePgnToLines } from '../../utils/pgnParser';
 import { Repertoire } from '../../types';
+import {
+  JOBAVA_LONDON_PGN,
+  D4_REPERTOIRE_PGN,
+  SICILIAN_KAN_PGN,
+  KINGS_INDIAN_PGN
+} from '../../utils/presets';
 
 interface NewRepertoireModalProps {
   onClose: () => void;
@@ -10,31 +16,28 @@ interface NewRepertoireModalProps {
 
 const PRESET_OPENINGS = [
   {
-    name: 'Italian Game & Giuoco Piano',
+    name: 'Jobava London System',
     color: 'white' as const,
-    pgn: `[Event "Italian Game - Main Line"]
-1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. c3 Nf6 5. d3 d6 6. O-O O-O 7. Nbd2 a6 8. Bb3 Ba7 9. h3 *
-
-[Event "Italian Game - Two Knights Defense"]
-1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. d3 Bc5 (4... Be7 5. O-O O-O 6. Re1 d6) 5. c3 d6 6. O-O O-O *`
+    linesCount: '23 lines',
+    pgn: JOBAVA_LONDON_PGN
+  },
+  {
+    name: '1d4 Repertoire',
+    color: 'white' as const,
+    linesCount: '38 lines',
+    pgn: D4_REPERTOIRE_PGN
+  },
+  {
+    name: 'Sicilian Kan',
+    color: 'black' as const,
+    linesCount: '50 lines',
+    pgn: SICILIAN_KAN_PGN
   },
   {
     name: "King's Indian Defense",
     color: 'black' as const,
-    pgn: `[Event "KID - Classical Mar del Plata"]
-1. d4 Nf6 2. c4 g6 3. Nc3 Bg7 4. e4 d6 5. Nf3 O-O 6. Be2 e5 7. O-O Nc6 8. d5 Ne7 9. Ne1 Nd7 *
-
-[Event "KID - Samisch Variation 5. f3"]
-1. d4 Nf6 2. c4 g6 3. Nc3 Bg7 4. e4 d6 5. f3 O-O 6. Be3 e5 7. d5 c6 8. Qd2 cxd5 9. cxd5 a6 *`
-  },
-  {
-    name: 'Caro-Kann Defense (Black)',
-    color: 'black' as const,
-    pgn: `[Event "Caro-Kann - Advance Variation"]
-1. e4 c6 2. d4 d5 3. e5 Bf5 4. Nf3 e6 5. Be2 c5 6. Be3 Qb6 7. Nc3 Nc6 *
-
-[Event "Caro-Kann - Classical 4...Bf5"]
-1. e4 c6 2. d4 d5 3. Nc3 dxe4 4. Nxe4 Bf5 5. Ng3 Bg6 6. h4 h6 7. Nf3 Nd7 *`
+    linesCount: '86 lines',
+    pgn: KINGS_INDIAN_PGN
   }
 ];
 
@@ -263,15 +266,15 @@ export const NewRepertoireModal: React.FC<NewRepertoireModalProps> = ({
                   <div
                     key={idx}
                     onClick={() => handleSelectPreset(p)}
-                    className="p-3 rounded-xl bg-[#141824] border border-[#2a3449] hover:border-[#e5a93c] cursor-pointer transition flex items-center justify-between"
+                    className="p-3.5 rounded-xl bg-[#141824] border border-[#2a3449] hover:border-[#e5a93c] cursor-pointer transition flex items-center justify-between"
                   >
                     <div>
                       <h4 className="text-xs font-bold text-white">{p.name}</h4>
-                      <span className="text-[11px] text-slate-400 uppercase">
-                        {p.color} repertoire
+                      <span className="text-[11px] text-slate-400 uppercase font-mono">
+                        {p.color} repertoire • {p.linesCount}
                       </span>
                     </div>
-                    <span className="text-xs font-semibold text-[#e5a93c]">
+                    <span className="text-xs font-semibold text-[#e5a93c] bg-[#e5a93c]/10 px-2.5 py-1 rounded-lg">
                       Use Preset
                     </span>
                   </div>

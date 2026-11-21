@@ -1,7 +1,7 @@
 import { Repertoire, EngineSettings } from '../types';
 import { getInitialPresets } from './presets';
 
-const STORAGE_KEY = 'chessatlas_repertoires_v1';
+const STORAGE_KEY = 'chessatlas_repertoires_v2';
 const SETTINGS_KEY = 'chessatlas_engine_settings_v1';
 
 export function loadRepertoires(): Repertoire[] {
@@ -24,6 +24,12 @@ export function loadRepertoires(): Repertoire[] {
     console.error('Failed to load repertoires:', e);
     return getInitialPresets();
   }
+}
+
+export function restoreDefaultPresets(): Repertoire[] {
+  const presets = getInitialPresets();
+  saveRepertoires(presets);
+  return presets;
 }
 
 export function saveRepertoires(repertoires: Repertoire[]): void {

@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { Plus, BookOpen, Clock, GraduationCap, Target, ChevronRight, Layers } from 'lucide-react';
+import {
+  Plus,
+  BookOpen,
+  Clock,
+  GraduationCap,
+  Target,
+  Layers,
+  Trash2,
+  RotateCcw
+} from 'lucide-react';
 import { Repertoire } from '../../types';
 
 interface DashboardProps {
@@ -8,6 +17,8 @@ interface DashboardProps {
   onOpenNewModal: () => void;
   onQuickLearn: (rep: Repertoire) => void;
   onQuickTrain: (rep: Repertoire) => void;
+  onDeleteRepertoire: (id: string) => void;
+  onRestoreDefaults: () => void;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
@@ -15,9 +26,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onSelectRepertoire,
   onOpenNewModal,
   onQuickLearn,
-  onQuickTrain
+  onQuickTrain,
+  onDeleteRepertoire,
+  onRestoreDefaults
 }) => {
   const [showArchived, setShowArchived] = useState(false);
+  const [repertoireToDelete, setRepertoireToDelete] = useState<Repertoire | null>(null);
 
   const whiteRepertoires = repertoires.filter(r => r.color === 'white' && (showArchived || !r.archived));
   const blackRepertoires = repertoires.filter(r => r.color === 'black' && (showArchived || !r.archived));
@@ -36,8 +50,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </h1>
         </div>
 
-        {/* Right tools: Show archived toggle & New repertoire button */}
-        <div className="flex items-center space-x-5">
+        {/* Right tools: Show archived toggle, Restore Defaults & New repertoire button */}
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={onRestoreDefaults}
+            title="Restore 4 Default Openings"
+            className="flex items-center space-x-1.5 text-xs text-slate-400 hover:text-white bg-[#202737] hover:bg-[#283247] px-3 py-2 rounded-xl border border-[#2e374d] transition"
+          >
+            <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
+            <span>Restore Defaults</span>
+          </button>
+
           <label className="flex items-center space-x-2 text-xs text-slate-400 cursor-pointer select-none">
             <input
               type="checkbox"
@@ -78,6 +101,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 onClick={() => onSelectRepertoire(rep)}
                 onLearn={() => onQuickLearn(rep)}
                 onTrain={() => onQuickTrain(rep)}
+                onDelete={() => setRepertoireToDelete(rep)}
               />
             ))}
 
@@ -113,6 +137,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 onClick={() => onSelectRepertoire(rep)}
                 onLearn={() => onQuickLearn(rep)}
                 onTrain={() => onQuickTrain(rep)}
+                onDelete={() => setRepertoireToDelete(rep)}
               />
             ))}
 
@@ -130,17 +155,57 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
       </main>
+
+      {/* Delete Confirmation Modal */}
+      {repertoireToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="bg-[#181d2a] border border-[#2e374e] rounded-2xl w-full max-w-sm p-6 shadow-2xl text-slate-100">
+            <div className="flex items-center space-x-3 text-rose-400 mb-3">
+              <div className="w-10 h-10 rounded-xl bg-rose-500/15 flex items-center justify-center">
+                <Trash2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white">Delete Opening?</h3>
+                <span className="text-xs text-slate-400">This action cannot be undone.</span>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-300 leading-relaxed mb-6">
+              Are you sure you want to permanently delete <strong className="text-white">"{repertoireToDelete.name}"</strong>? All {repertoireToDelete.lines.length} lines, learned status, and training stats will be removed.
+            </p>
+
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setRepertoireToDelete(null)}
+                className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white rounded-xl hover:bg-[#202737] transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  onDeleteRepertoire(repertoireToDelete.id);
+                  setRepertoireToDelete(null);
+                }}
+                className="px-5 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-500 rounded-xl shadow-md transition"
+              >
+                Delete Opening
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-// Repertoire Card Component (matches Image 1)
+// Repertoire Card Component with Delete Button
 const RepertoireCard: React.FC<{
   repertoire: Repertoire;
   onClick: () => void;
   onLearn: () => void;
   onTrain: () => void;
-}> = ({ repertoire, onClick, onLearn, onTrain }) => {
+  onDelete: () => void;
+}> = ({ repertoire, onClick, onLearn, onTrain, onDelete }) => {
   const totalLines = repertoire.lines.length;
   const learnedCount = repertoire.lines.filter(l => l.learned).length;
   const trainedCount = repertoire.lines.filter(l => l.trained).length;
@@ -160,9 +225,11 @@ const RepertoireCard: React.FC<{
           </div>
 
           <div className="flex-1 min-w-0">
-            <h3 className="text-base font-bold text-white truncate group-hover:text-[#e5a93c] transition-colors">
-              {repertoire.name}
-            </h3>
+            <div className="flex items-center space-x-2">
+              <h3 className="text-base font-bold text-white truncate group-hover:text-[#e5a93c] transition-colors">
+                {repertoire.name}
+              </h3>
+            </div>
 
             {/* Book icon with count (e.g. 23/23 or 0/38) */}
             <div className="flex items-center space-x-1.5 text-xs text-slate-400 mt-1">
@@ -172,7 +239,7 @@ const RepertoireCard: React.FC<{
               </span>
             </div>
 
-            {/* Subtitle status: e.g. "38 to learn" or "Review in 13h" */}
+            {/* Subtitle status: e.g. "38 to learn" or "Review ready" */}
             <div className="flex items-center space-x-1.5 text-[11px] text-slate-400 mt-1">
               {isComplete ? (
                 <>
@@ -189,29 +256,42 @@ const RepertoireCard: React.FC<{
           </div>
         </div>
 
-        {/* Right: Circular Progress Indicator (matches Image 1) */}
-        <div className="flex-shrink-0 relative w-12 h-12 flex items-center justify-center">
-          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-            <path
-              className="text-[#242c3e]"
-              strokeWidth="3.2"
-              stroke="currentColor"
-              fill="none"
-              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-            />
-            <path
-              className={isComplete ? 'text-emerald-400' : 'text-[#e5a93c]'}
-              strokeDasharray={`${progressPercent}, 100`}
-              strokeWidth="3.2"
-              strokeLinecap="round"
-              stroke="currentColor"
-              fill="none"
-              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-            />
-          </svg>
-          <span className="absolute text-[10px] font-bold text-white font-mono">
-            {progressPercent}%
-          </span>
+        {/* Right: Circular Progress Indicator & Delete button */}
+        <div className="flex flex-col items-end space-y-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            title="Delete opening"
+            className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+
+          <div className="relative w-11 h-11 flex items-center justify-center">
+            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+              <path
+                className="text-[#242c3e]"
+                strokeWidth="3.2"
+                stroke="currentColor"
+                fill="none"
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+              />
+              <path
+                className={isComplete ? 'text-emerald-400' : 'text-[#e5a93c]'}
+                strokeDasharray={`${progressPercent}, 100`}
+                strokeWidth="3.2"
+                strokeLinecap="round"
+                stroke="currentColor"
+                fill="none"
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+              />
+            </svg>
+            <span className="absolute text-[10px] font-bold text-white font-mono">
+              {progressPercent}%
+            </span>
+          </div>
         </div>
       </div>
 
