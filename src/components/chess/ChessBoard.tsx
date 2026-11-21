@@ -96,16 +96,32 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
     return map;
   }, [chess]);
 
-  // Legal moves from selected square
+  // Legal moves from selected square (supports showing destinations even during opponent turn)
   const legalMoves = useMemo(() => {
     if (!selectedSquare || !interactive) return [];
     try {
-      const moves = chess.moves({ square: selectedSquare as Square, verbose: true });
-      return moves.map(m => ({ to: m.to, isCapture: Boolean(m.captured) }));
+      const piece = boardState[selectedSquare];
+      if (!piece) return [];
+
+      // If it's this piece's turn, get real legal moves
+      if (piece.color === chess.turn()) {
+        const moves = chess.moves({ square: selectedSquare as Square, verbose: true });
+        return moves.map(m => ({ to: m.to, isCapture: Boolean(m.captured) }));
+      }
+
+      // If it's opponent's turn, simulate this piece's legal moves so destinations still show
+      const tokens = fen.split(' ');
+      if (tokens.length >= 2) {
+        tokens[1] = piece.color;
+        const simChess = new Chess(tokens.join(' '));
+        const moves = simChess.moves({ square: selectedSquare as Square, verbose: true });
+        return moves.map(m => ({ to: m.to, isCapture: Boolean(m.captured) }));
+      }
+      return [];
     } catch (_) {
       return [];
     }
-  }, [chess, selectedSquare, interactive]);
+  }, [chess, fen, selectedSquare, interactive, boardState]);
 
   // Clear selection if fen changes
   useEffect(() => {
@@ -123,32 +139,47 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
         setSelectedSquare(null);
         return;
       }
-      const isLegal = legalMoves.some(m => m.to === sq);
-      if (isLegal && onMove) {
-        const from = selectedSquare;
-        setSelectedSquare(null);
-        onMove(from, sq);
+
+      const piece = boardState[selectedSquare];
+      const isPlayerTurn = piece && piece.color === chess.turn();
+
+      // Only execute move if it's currently this piece's turn in chess.js
+      if (isPlayerTurn && onMove) {
+        const isLegal = legalMoves.some(m => m.to === sq);
+        if (isLegal) {
+          const from = selectedSquare;
+          setSelectedSquare(null);
+          onMove(from, sq);
+          return;
+        }
+      }
+
+      // If clicking another piece, switch selection directly
+      const targetPiece = boardState[sq];
+      if (targetPiece) {
+        setSelectedSquare(sq);
         return;
       }
+
+      setSelectedSquare(null);
+      return;
     }
 
     const piece = boardState[sq];
     if (piece) {
-      const turn = chess.turn();
-      if (piece.color === turn) {
-        setSelectedSquare(sq);
-        return;
-      }
+      // Allow selecting pieces anytime, even when opponent is playing
+      setSelectedSquare(sq);
+      return;
     }
 
     setSelectedSquare(null);
   };
 
-  // Drag and drop handlers
+  // Drag and drop handlers - allow picking up and dragging pieces anytime!
   const handleMouseDown = (e: React.MouseEvent, sq: string) => {
     if (!interactive) return;
     const piece = boardState[sq];
-    if (!piece || piece.color !== chess.turn()) return;
+    if (!piece) return;
 
     setDraggedSquare(sq);
     setSelectedSquare(sq);
@@ -158,7 +189,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   const handleTouchStart = (e: React.TouchEvent, sq: string) => {
     if (!interactive) return;
     const piece = boardState[sq];
-    if (!piece || piece.color !== chess.turn()) return;
+    if (!piece) return;
 
     const touch = e.touches[0];
     setDraggedSquare(sq);
@@ -201,7 +232,11 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
 
         if (colIdx >= 0 && colIdx < 8 && rowIdx >= 0 && rowIdx < 8) {
           const targetSq = `${displayFiles[colIdx]}${displayRanks[rowIdx]}`;
-          if (targetSq !== draggedSquare && onMove) {
+          const piece = boardState[draggedSquare];
+          const isPlayerTurn = piece && piece.color === chess.turn();
+
+          // Only submit move if it's this piece's turn
+          if (targetSq !== draggedSquare && onMove && isPlayerTurn) {
             const isLegal = legalMoves.some(m => m.to === targetSq);
             if (isLegal) {
               onMove(draggedSquare, targetSq);
@@ -237,7 +272,11 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
 
         if (colIdx >= 0 && colIdx < 8 && rowIdx >= 0 && rowIdx < 8) {
           const targetSq = `${displayFiles[colIdx]}${displayRanks[rowIdx]}`;
-          if (targetSq !== draggedSquare && onMove) {
+          const piece = boardState[draggedSquare];
+          const isPlayerTurn = piece && piece.color === chess.turn();
+
+          // Only submit move if it's this piece's turn
+          if (targetSq !== draggedSquare && onMove && isPlayerTurn) {
             const isLegal = legalMoves.some(m => m.to === targetSq);
             if (isLegal) {
               onMove(draggedSquare, targetSq);
@@ -262,7 +301,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [draggedSquare, displayFiles, displayRanks, legalMoves, onMove]);
+  }, [draggedSquare, displayFiles, displayRanks, legalMoves, onMove, boardState, chess]);
 
   // Convert chess square (e.g. 'e4') to 0-7 SVG coordinate percentages (0 to 100)
   const getSquareCenter = (sq: string): { x: number; y: number } | null => {
