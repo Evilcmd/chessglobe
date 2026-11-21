@@ -386,10 +386,10 @@ export const LearnView: React.FC<LearnViewProps> = ({
           </div>
 
           {/* 3. Middle Section: Speech Bubble with Bird Mascot (matches Image 3) */}
-          <div className="flex-1 min-h-0 overflow-y-auto py-2 flex flex-col justify-center">
-            <div className="flex items-start space-x-3">
-              {/* Mascot Bird Avatar */}
-              <div className="w-11 h-11 flex-shrink-0 rounded-full bg-[#1b2131] border border-[#2b354b] p-1 flex items-center justify-center shadow-md">
+          <div className="flex-1 min-h-0 py-3 flex flex-col justify-center">
+            <div className="flex items-start space-x-2 sm:space-x-2.5 w-full">
+              {/* Mascot Bird Avatar (matches Image 3: standalone mascot standing beside bubble) */}
+              <div className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0 flex items-center justify-center filter drop-shadow-lg mt-0.5">
                 <img
                   src="/mascot.svg"
                   alt="ChessAtlas Mascot"
@@ -397,27 +397,36 @@ export const LearnView: React.FC<LearnViewProps> = ({
                 />
               </div>
 
-              {/* Speech Bubble (White background, rounded card, tail pointing left to mascot) */}
-              <div className="flex-1 bg-white text-slate-800 rounded-2xl rounded-tl-sm p-4 relative shadow-lg border border-slate-100 max-h-[300px] overflow-y-auto">
-                <div className="absolute top-3 -left-2 w-2.5 h-2.5 bg-white transform rotate-45 border-l border-b border-slate-100" />
+              {/* Connector Dot between Mascot and Bubble (matches Image 3) */}
+              <div className="flex items-center self-start mt-5 flex-shrink-0">
+                <div className="w-2.5 h-2.5 rounded-full bg-[#4a5878] border border-[#6b7d9e]" />
+              </div>
 
-                {currentComment ? (
-                  <p className="text-[13px] leading-relaxed font-sans text-slate-800 whitespace-pre-line selection:bg-amber-100">
-                    {currentComment}
-                  </p>
-                ) : (
-                  <div className="text-[13px] leading-relaxed text-slate-700">
-                    {isPlayerTurn && nextExpectedMove ? (
-                      <span>
-                        Play <strong className="text-amber-600 font-mono font-bold">{nextExpectedMove.san}</strong> on the board to proceed with the line.
-                      </span>
-                    ) : (
-                      <span>
-                        Follow the line and observe the move carefully.
-                      </span>
-                    )}
-                  </div>
-                )}
+              {/* Speech Bubble (White background, rounded card, bold readable text) */}
+              <div className="relative flex-1 bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200/90">
+                {/* Triangular speech bubble tail pointing left to the connector dot */}
+                <div className="absolute top-4 -left-2 w-3.5 h-3.5 bg-white transform rotate-45 border-l border-b border-slate-200/90 pointer-events-none" />
+
+                {/* Inner scrollable text container with bold, comfortable sizing */}
+                <div className="p-4 sm:p-5 max-h-[380px] xl:max-h-[440px] overflow-y-auto">
+                  {currentComment ? (
+                    <p className="text-[15.5px] sm:text-[16px] font-semibold text-slate-900 leading-[1.65] font-sans whitespace-pre-line tracking-[-0.01em] selection:bg-amber-100">
+                      {currentComment}
+                    </p>
+                  ) : (
+                    <div className="text-[15.5px] font-semibold text-slate-800 leading-relaxed font-sans">
+                      {isPlayerTurn && nextExpectedMove ? (
+                        <span>
+                          Play <span className="inline-block px-2 py-0.5 mx-1 font-mono font-bold text-amber-700 bg-amber-50 border border-amber-300 rounded-md shadow-2xs text-base">{nextExpectedMove.san}</span> on the board to proceed with the line.
+                        </span>
+                      ) : (
+                        <span>
+                          Follow the line and observe the move carefully.
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
