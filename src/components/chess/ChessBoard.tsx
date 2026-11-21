@@ -21,7 +21,7 @@ interface ChessBoardProps {
   showEvalBar?: boolean;
   evalScore?: string;
   centipawns?: number;
-  boardSize?: number;
+  className?: string;
 }
 
 const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
@@ -38,7 +38,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   showEvalBar = false,
   evalScore = '0.0',
   centipawns = 0,
-  boardSize = 560
+  className = ''
 }) => {
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
   const [draggedSquare, setDraggedSquare] = useState<string | null>(null);
@@ -118,7 +118,6 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   const handleSquareClick = (sq: string) => {
     if (!interactive) return;
 
-    // If already selected, try to move
     if (selectedSquare) {
       if (selectedSquare === sq) {
         setSelectedSquare(null);
@@ -133,11 +132,9 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
       }
     }
 
-    // Select piece if it belongs to player's turn or has moves
     const piece = boardState[sq];
     if (piece) {
       const turn = chess.turn();
-      // Allow selecting current turn's pieces
       if (piece.color === turn) {
         setSelectedSquare(sq);
         return;
@@ -284,24 +281,21 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   // Eval bar height percentage (standard sigmoid curve)
   const whiteAdvantagePercent = useMemo(() => {
     const cp = centipawns;
-    // Sigmoid mapping -1000cp (-10) to +1000cp (+10) -> 0% to 100%
     const winChance = 2 / (1 + Math.exp(-0.00368208 * cp)) - 1;
     let percent = 50 + winChance * 50;
     percent = Math.max(3, Math.min(97, percent));
     return percent;
   }, [centipawns]);
 
-  // If flipped, invert eval bar display so player's color is at the bottom
   const barTopFillPercent = isFlipped ? whiteAdvantagePercent : 100 - whiteAdvantagePercent;
 
   return (
-    <div className="flex items-stretch select-none justify-center w-full max-w-full">
+    <div className={`flex items-stretch select-none justify-center h-full max-h-full ${className}`}>
       {/* Eval Bar on the left */}
       <div
-        className={`transition-all duration-300 ease-in-out overflow-hidden flex flex-col items-center rounded-l-md mr-1.5 shadow-md relative ${
+        className={`transition-all duration-300 ease-in-out overflow-hidden flex flex-col items-center rounded-l-md mr-1.5 shadow-md relative h-full ${
           showEvalBar ? 'w-6 sm:w-7 opacity-100' : 'w-0 opacity-0 pointer-events-none'
         }`}
-        style={{ maxHeight: boardSize }}
       >
         {/* Top portion (Black if straight, White if flipped) */}
         <div
@@ -326,11 +320,10 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
         </div>
       </div>
 
-      {/* Chessboard container */}
+      {/* Chessboard container - naturally square and fills parent height */}
       <div
         ref={boardRef}
-        className="relative rounded-md overflow-hidden shadow-2xl border border-[#2b3347] bg-[#b58863] aspect-square w-full"
-        style={{ maxWidth: boardSize }}
+        className="relative rounded-md overflow-hidden shadow-2xl border border-[#2b3347] bg-[#b58863] h-full aspect-square max-h-full max-w-full"
       >
         {/* 8x8 Board Grid */}
         <div className="grid grid-cols-8 grid-rows-8 w-full h-full">
@@ -352,7 +345,6 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
               const isLegalDest = legalMoves.some(m => m.to === sq);
               const isCapture = legalMoves.find(m => m.to === sq)?.isCapture;
 
-              // Square background color
               let bgClass = isDark ? 'bg-[#b58863]' : 'bg-[#f0d9b5]';
               if (isWrong) {
                 bgClass = 'bg-red-500/80 animate-pulse';
@@ -416,7 +408,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
                     );
                   })()}
 
-                  {/* Board Coordinates on Edge Squares (Lichess style) */}
+                  {/* Board Coordinates */}
                   {colIdx === 0 && (
                     <span
                       className={`absolute top-0.5 left-1 text-[11px] font-bold select-none ${
@@ -441,7 +433,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
           )}
         </div>
 
-        {/* SVG Overlay for Arrows (Golden guidance arrow / Engine best-move arrow) */}
+        {/* SVG Overlay for Arrows */}
         <svg
           className="absolute inset-0 w-full h-full pointer-events-none z-20"
           viewBox="0 0 100 100"
@@ -474,7 +466,6 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
             const end = getSquareCenter(arr.to);
             if (!start || !end) return null;
 
-            // Shorten the end of the line slightly so arrowhead doesn't overlap center
             const dx = end.x - start.x;
             const dy = end.y - start.y;
             const len = Math.hypot(dx, dy);

@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Target,
-  ArrowLeft,
+  X,
   RotateCcw,
   Sparkles,
   Eye,
   CheckCircle2,
   AlertCircle,
   HelpCircle,
-  Trophy
+  Trophy,
+  ChevronRight
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { Repertoire } from '../../types';
@@ -29,8 +30,7 @@ const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 export const TrainView: React.FC<TrainViewProps> = ({
   repertoire,
   onBack,
-  onUpdateRepertoire,
-  boardSize = 640
+  onUpdateRepertoire
 }) => {
   // Reactive tracking of trained line IDs so mastered count updates instantly in real time
   const [trainedLineIds, setTrainedLineIds] = useState<Set<string>>(
@@ -118,45 +118,52 @@ export const TrainView: React.FC<TrainViewProps> = ({
             sound.playMove();
           }
           setMoveIndex(prev => prev + 1);
-        }, 360);
+        }, 400);
         return () => clearTimeout(timer);
       }
     } else if (moves.length > 0 && moveIndex === moves.length && !lineFinished) {
-      // Completed current line!
+      // Completed line!
       setLineFinished(true);
+      setShowMistakeUI(false);
+      setShowMoveRevealed(false);
 
-      if (!lineHasMistake && !showMoveRevealed) {
-        // Line solved CLEANLY!
+      if (!lineHasMistake) {
+        // Mastered with zero mistakes!
         setSolvedSuccessfully(true);
         sound.playSuccess();
-        updateLineStatus(repertoire.id, currentLine.id, { trained: true });
-
-        // Update local trained set so count updates immediately
-        setTrainedLineIds(prev => new Set([...prev, currentLine.id]));
-        onUpdateRepertoire?.();
-
         confetti({
-          particleCount: 65,
+          particleCount: 60,
           spread: 70,
           origin: { y: 0.6 }
         });
 
-        // Remove from current rotation queue
-        setQueue(prevQueue => {
-          const nextQ = prevQueue.filter(idx => idx !== currentLineIndex);
-          if (nextQ.length === 0) {
+        // 1. Immediately update local state so mastered counter updates in real time
+        setTrainedLineIds(prev => {
+          const next = new Set(prev);
+          next.add(currentLine.id);
+          return next;
+        });
+
+        // 2. Persist to storage
+        updateLineStatus(repertoire.id, currentLine.id, { trained: true });
+        if (onUpdateRepertoire) onUpdateRepertoire();
+
+        // 3. Remove this line from the rotation queue
+        setQueue(prev => {
+          const updated = prev.filter(idx => idx !== currentLineIndex);
+          if (updated.length === 0) {
             setAllMastered(true);
           }
-          return nextQ;
+          return updated;
         });
       } else {
-        // Solved with mistake(s)
+        // Line completed, but user made mistakes
         setSolvedSuccessfully(false);
         sound.playWrong();
-        // Keep in queue by putting it at the end of the rotation
-        setQueue(prevQueue => {
-          const filtered = prevQueue.filter(idx => idx !== currentLineIndex);
-          return [...filtered, currentLineIndex];
+        // Keep in queue and shuffle position to end
+        setQueue(prev => {
+          const remaining = prev.filter(idx => idx !== currentLineIndex);
+          return [...remaining, currentLineIndex];
         });
       }
     }
@@ -165,18 +172,17 @@ export const TrainView: React.FC<TrainViewProps> = ({
     moves,
     playerColor,
     lineFinished,
+    allMastered,
     lineHasMistake,
-    showMoveRevealed,
+    currentLine.id,
     currentLineIndex,
     repertoire.id,
-    currentLine?.id,
-    allMastered,
     onUpdateRepertoire
   ]);
 
-  // Handle user making a move
+  // Handle user's move on the board
   const handleUserMove = (from: string, to: string) => {
-    if (moveIndex >= moves.length || lineFinished) return;
+    if (moveIndex >= moves.length || lineFinished || allMastered) return;
     const expected = moves[moveIndex];
     if (!expected) return;
 
@@ -191,130 +197,84 @@ export const TrainView: React.FC<TrainViewProps> = ({
         setMoveIndex(prev => prev + 1);
         setWrongSquare(null);
 
-        // Hide "Show Move" button and arrow on correct move!
+        // Correct move played: dismiss the "Show Move" button and mistake alert
         setShowMistakeUI(false);
         setShowMoveRevealed(false);
       } else {
-        // Wrong move!
+        // Mistake!
         sound.playWrong();
         setWrongSquare(from);
-        setLineHasMistake(true);
-        setShowMistakeUI(true); // Show button for this move!
-
-        // Mark line as untrained and record mistake immediately
-        updateLineStatus(repertoire.id, currentLine.id, { mistake: true, trained: false });
         setTimeout(() => setWrongSquare(null), 500);
+
+        // Mark line as having a mistake (so it remains in rotation)
+        setLineHasMistake(true);
+
+        // Show the retry mistake UI with "Show Move" button
+        setShowMistakeUI(true);
       }
     }
   };
 
-  // Advance to next line in rotation
+  // "Show Move" button click
+  const handleShowMove = () => {
+    setShowMoveRevealed(true);
+  };
+
+  // Advance to next line from the rotation queue
   const advanceToNextLine = () => {
     if (queue.length === 0) {
       setAllMastered(true);
       return;
     }
 
-    // Pick next line from rotation
-    const nextIdx = queue[0];
-    setCurrentLineIndex(nextIdx);
+    const nextLineIdx = queue[0];
+    setCurrentLineIndex(nextLineIdx);
     setMoveIndex(0);
     setLineHasMistake(false);
     setShowMistakeUI(false);
     setShowMoveRevealed(false);
     setLineFinished(false);
     setSolvedSuccessfully(false);
-    setWrongSquare(null);
   };
 
-  // Reveal correct move when user clicks "Show Move"
-  const handleShowMove = () => {
-    setShowMoveRevealed(true);
-    setLineHasMistake(true);
-    updateLineStatus(repertoire.id, currentLine.id, { mistake: true, trained: false });
+  // Restart current line
+  const handleRetryLine = () => {
+    setMoveIndex(0);
+    setLineHasMistake(false);
+    setShowMistakeUI(false);
+    setShowMoveRevealed(false);
+    setLineFinished(false);
+    setSolvedSuccessfully(false);
   };
 
-  // Reset training progress
+  // Reset all training progress for this repertoire
   const handleResetTraining = () => {
-    resetTrainingProgress(repertoire.id);
-    const allIndices = repertoire.lines.map((_, i) => i).sort(() => Math.random() - 0.5);
-    setTrainedLineIds(new Set());
-    onUpdateRepertoire?.();
-    setQueue(allIndices);
-    setCurrentLineIndex(allIndices[0]);
-    setMoveIndex(0);
-    setLineHasMistake(false);
-    setShowMistakeUI(false);
-    setShowMoveRevealed(false);
-    setLineFinished(false);
-    setAllMastered(false);
-    setSolvedSuccessfully(false);
+    if (confirm('Reset all training progress for this repertoire? All lines will return to untrained status.')) {
+      resetTrainingProgress(repertoire.id);
+      setTrainedLineIds(new Set());
+      const allIndices = repertoire.lines.map((_, i) => i).sort(() => Math.random() - 0.5);
+      setQueue(allIndices);
+      setCurrentLineIndex(allIndices[0] ?? 0);
+      setMoveIndex(0);
+      setLineHasMistake(false);
+      setShowMistakeUI(false);
+      setShowMoveRevealed(false);
+      setLineFinished(false);
+      setAllMastered(false);
+      setSolvedSuccessfully(false);
+      if (onUpdateRepertoire) onUpdateRepertoire();
+    }
   };
 
   const totalTrainedCount = trainedLineIds.size;
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#131722] text-slate-100">
-      {/* Top Header */}
-      <header className="flex items-center justify-between px-6 py-3.5 border-b border-[#242b3c] bg-[#181d2a]">
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={onBack}
-            className="flex items-center space-x-1.5 text-xs font-semibold text-slate-400 hover:text-white bg-[#202737] hover:bg-[#2a3449] px-3 py-1.5 rounded-lg border border-[#2e374d] transition"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Repertoire</span>
-          </button>
-
-          <div className="flex items-center space-x-2">
-            <span className="p-1 rounded-md bg-[#e5a93c]/15 text-[#e5a93c]">
-              <Target className="w-4 h-4" />
-            </span>
-            <span className="text-sm font-bold text-white">Train</span>
-            <span className="text-xs text-slate-400 font-medium hidden sm:inline">
-              • {repertoire.name}
-            </span>
-          </div>
-        </div>
-
-        {/* Rotation queue status & Flip board button */}
-        <div className="flex items-center space-x-3">
-          <span className="text-xs font-medium text-slate-300 bg-[#22293b] px-3 py-1.5 rounded-lg border border-[#2e374e]">
-            Rotation Queue: <strong className="text-[#e5a93c]">{queue.length}</strong> remaining
-          </span>
-
-          <button
-            onClick={() => setIsFlippedManual(!isFlippedManual)}
-            title="Flip Board (White / Black)"
-            className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#242b3d] transition border border-[#2e374d]"
-          >
-            <FlipBoardIcon className="w-4 h-4" />
-          </button>
-
-          <button
-            onClick={handleResetTraining}
-            title="Reset Training Progress"
-            className="hidden sm:flex items-center space-x-1 text-xs font-medium text-slate-400 hover:text-white bg-[#202737] hover:bg-[#2a3449] px-2.5 py-1.5 rounded-lg border border-[#2e374d] transition"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset</span>
-          </button>
-        </div>
-      </header>
-
-      {/* Progress Bar (Percentage of lines trained in this repertoire) */}
-      <div className="w-full bg-[#1e2536] h-1.5 relative overflow-hidden">
-        <div
-          className="bg-[#e5a93c] h-full transition-all duration-300"
-          style={{ width: `${(totalTrainedCount / repertoire.lines.length) * 100}%` }}
-        />
-      </div>
-
-      {/* Main Container - Generous Desktop Scaling */}
-      <div className="flex-1 flex flex-col lg:flex-row items-center lg:items-start justify-center p-4 sm:p-6 lg:p-8 gap-6 lg:gap-10 max-w-[1400px] mx-auto w-full">
-        {/* Left / Center: Board */}
-        <div className="flex flex-col items-center w-full max-w-[min(680px,80vh)] xl:max-w-[min(740px,82vh)]">
-          <div className="relative w-full">
+    <div className="h-screen max-h-screen w-screen overflow-hidden bg-[#0d111a] text-slate-100 flex items-center justify-center p-3 sm:p-4 lg:p-6 select-none">
+      {/* Main Container: Full-Height Board on Left + Single Unified Card on Right */}
+      <div className="flex flex-col lg:flex-row items-center lg:items-stretch justify-center gap-4 lg:gap-6 w-full max-w-[1550px] h-full max-h-full">
+        {/* Left Column: Full-Height Chessboard */}
+        <div className="h-full flex-1 min-w-0 max-h-full flex items-center justify-center relative">
+          <div className="relative h-full max-h-full flex items-center justify-center">
             <ChessBoard
               fen={currentFen}
               orientation={isFlippedManual ? 'black' : 'white'}
@@ -323,13 +283,13 @@ export const TrainView: React.FC<TrainViewProps> = ({
               onMove={handleUserMove}
               lastMove={lastMove}
               wrongSquare={wrongSquare}
-              showEvalBar={false} /* NO engine in training */
-              boardSize={boardSize}
+              showEvalBar={false} /* Engine is disabled in training */
+              className="h-full max-h-full"
             />
 
-            {/* Success / Mistake Overlay when line finishes */}
+            {/* Line Finished Overlay Banner */}
             {lineFinished && !allMastered && (
-              <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-xs flex flex-col items-center justify-center p-6 text-center rounded-md z-30 animate-fade-in">
+              <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-xs flex flex-col items-center justify-center p-6 text-center rounded-xl z-30 animate-fade-in">
                 {solvedSuccessfully ? (
                   <>
                     <div className="w-14 h-14 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mb-3 shadow-lg">
@@ -367,8 +327,8 @@ export const TrainView: React.FC<TrainViewProps> = ({
 
             {/* All Lines Mastered Celebration Screen */}
             {allMastered && (
-              <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-sm flex flex-col items-center justify-center p-8 text-center rounded-md z-30 animate-fade-in">
-                <div className="w-16 h-16 rounded-full bg-[#e5a93c]/20 text-[#e5a93c] flex items-center justify-center mb-4">
+              <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-sm flex flex-col items-center justify-center p-8 text-center rounded-xl z-30 animate-fade-in">
+                <div className="w-16 h-16 rounded-full bg-[#e5a93c]/20 text-[#e5a93c] flex items-center justify-center mb-4 shadow-xl">
                   <Trophy className="w-9 h-9" />
                 </div>
                 <h2 className="text-2xl font-extrabold text-white mb-2">
@@ -388,7 +348,7 @@ export const TrainView: React.FC<TrainViewProps> = ({
                     onClick={onBack}
                     className="px-6 py-2.5 text-xs font-bold text-slate-950 bg-[#e5a93c] hover:bg-[#f59e0b] rounded-xl shadow-lg transition"
                   >
-                    Return to Repertoires
+                    Return to Repertoire
                   </button>
                 </div>
               </div>
@@ -396,44 +356,72 @@ export const TrainView: React.FC<TrainViewProps> = ({
           </div>
         </div>
 
-        {/* Right Panel: Training Status & Controls */}
-        <div className="w-full lg:w-[420px] xl:w-[460px] flex flex-col space-y-4">
-          {/* Training Header Card */}
-          <div className="bg-[#181d2a] border border-[#2b3347] rounded-2xl p-5 shadow-md">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-mono font-bold bg-[#e5a93c]/20 text-[#e5a93c] px-2.5 py-1 rounded">
-                Line #{currentLineIndex + 1}
-              </span>
-              <span className="text-xs text-slate-400">
-                Move {moveIndex} of {moves.length}
-              </span>
+        {/* Right Column: Unified Card (Top Header, Progress, Middle Interactive Area, Bottom Controls) */}
+        <div className="w-full lg:w-[440px] xl:w-[480px] h-full max-h-full flex flex-col justify-between bg-[#161c28] border border-[#263043] rounded-2xl shadow-2xl p-5 overflow-hidden flex-shrink-0">
+          {/* 1. Card Top Header */}
+          <div className="flex items-center justify-between pb-3 border-b border-[#242c3f]">
+            {/* Left: Mode Badge & Title */}
+            <div className="flex items-center space-x-3 min-w-0">
+              <div className="w-9 h-9 rounded-xl bg-[#e5a93c]/15 text-[#e5a93c] flex items-center justify-center flex-shrink-0 border border-[#e5a93c]/25">
+                <Target className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-sm font-bold text-white leading-tight">Train</div>
+                <div className="text-xs text-slate-400 font-medium truncate max-w-[210px]">
+                  Line #{currentLineIndex + 1} • {currentLine.name}
+                </div>
+              </div>
             </div>
 
-            <h3 className="text-base font-bold text-white mb-1 truncate">
-              {currentLine.name}
-            </h3>
-            <p className="text-xs text-slate-400 font-mono truncate">
-              {currentLine.keyMovesSummary}
-            </p>
-
-            <div className="mt-4 pt-4 border-t border-[#23293a] flex items-center justify-between text-xs">
-              <span className="text-slate-400">Mastered Lines:</span>
-              <span className="font-bold text-emerald-400 font-mono text-sm">
-                {totalTrainedCount} / {repertoire.lines.length} ({Math.round((totalTrainedCount / repertoire.lines.length) * 100)}%)
-              </span>
+            {/* Right: Actions (Flip, Reset Training, Exit) */}
+            <div className="flex items-center space-x-1.5 flex-shrink-0">
+              <button
+                onClick={() => setIsFlippedManual(!isFlippedManual)}
+                title="Flip Board (White / Black)"
+                className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#202739] transition border border-transparent hover:border-[#2d374e]"
+              >
+                <FlipBoardIcon className="w-4 h-4" />
+              </button>
+              <button
+                onClick={handleResetTraining}
+                title="Reset Training Progress"
+                className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#202739] transition border border-transparent hover:border-[#2d374e]"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </button>
+              <button
+                onClick={onBack}
+                title="Exit to Repertoire"
+                className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#202739] transition border border-transparent hover:border-[#2d374e]"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
           </div>
 
-          {/* Action Box: Training Instructions & "Show Move" Button */}
-          <div className="bg-[#181d2a] border border-[#2b3347] rounded-2xl p-5 shadow-md flex flex-col items-center text-center">
+          {/* 2. Progress Bar: Mastered lines count */}
+          <div className="flex items-center space-x-3 pt-3 pb-1">
+            <div className="flex-1 bg-[#1e2536] h-1.5 rounded-full overflow-hidden">
+              <div
+                className="bg-[#e5a93c] h-full transition-all duration-300 rounded-full"
+                style={{ width: `${(totalTrainedCount / repertoire.lines.length) * 100}%` }}
+              />
+            </div>
+            <span className="text-xs font-mono font-semibold text-[#e5a93c] flex-shrink-0">
+              {totalTrainedCount}/{repertoire.lines.length}
+            </span>
+          </div>
+
+          {/* 3. Middle Section: Training Instructions, Mistakes & Show Move Button */}
+          <div className="flex-1 min-h-0 overflow-y-auto py-4 flex flex-col items-center justify-center text-center">
             {showMistakeUI ? (
-              <div className="w-full animate-fade-in">
-                <div className="flex items-center justify-center space-x-2 text-rose-400 text-xs font-semibold mb-3">
-                  <AlertCircle className="w-4 h-4" />
+              <div className="w-full max-w-sm flex flex-col items-center animate-fade-in p-4 bg-[#1e2435] border border-rose-500/30 rounded-2xl shadow-lg">
+                <div className="flex items-center space-x-2 text-rose-400 text-xs font-semibold mb-3">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
                   <span>Incorrect move! You can keep trying.</span>
                 </div>
 
-                {/* Show Move Button (disappears as soon as the correct move is played!) */}
+                {/* Show Move Button (disappears immediately after the correct move is played!) */}
                 <button
                   onClick={handleShowMove}
                   className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-[#262f44] hover:bg-[#323d57] text-[#e5a93c] border border-[#e5a93c]/40 font-bold text-xs rounded-xl transition shadow-md"
@@ -443,33 +431,49 @@ export const TrainView: React.FC<TrainViewProps> = ({
                 </button>
               </div>
             ) : (
-              <div className="py-2">
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  Make the correct opening move on the board from memory.
-                </p>
-                <p className="text-[11px] text-slate-500 mt-1">
-                  Opponent will reply automatically with sound and smooth piece movement. Solve cleanly to master!
-                </p>
+              <div className="flex flex-col items-center space-y-3 p-4">
+                <div className="w-12 h-12 rounded-full bg-[#1b2131] border border-[#2b354b] p-1.5 flex items-center justify-center shadow-md">
+                  <img
+                    src="/mascot.svg"
+                    alt="ChessAtlas Mascot"
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-slate-200">
+                    Make your move from memory
+                  </p>
+                  <p className="text-xs text-slate-400 max-w-xs">
+                    Play the expected opening moves. Opponent responses are made automatically.
+                  </p>
+                </div>
               </div>
             )}
           </div>
 
-          {/* Quick Line Skip / Restart line */}
-          <div className="flex items-center justify-between bg-[#181d2a] border border-[#2b3347] rounded-xl p-3 px-4 shadow-md">
-            <span className="text-xs text-slate-400">Need to retry this line?</span>
-            <button
-              onClick={() => {
-                setMoveIndex(0);
-                setShowMistakeUI(false);
-                setShowMoveRevealed(false);
-                setLineFinished(false);
-                setWrongSquare(null);
-              }}
-              className="flex items-center space-x-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-[#22293b] hover:bg-[#2b344a] px-3 py-1.5 rounded-lg border border-[#2e374d] transition"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Restart Line</span>
-            </button>
+          {/* 4. Bottom Section: Queue status & Line Navigation */}
+          <div className="flex items-center justify-between pt-3 border-t border-[#242c3f]">
+            <span className="text-xs text-slate-400 font-medium">
+              Queue: <strong className="text-[#e5a93c] font-mono">{queue.length}</strong> lines left
+            </span>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={handleRetryLine}
+                title="Restart Current Line"
+                className="flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white bg-[#222a3d] hover:bg-[#2b354d] border border-[#2e374f] transition"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Restart</span>
+              </button>
+              <button
+                onClick={advanceToNextLine}
+                title="Next Line in Rotation"
+                className="flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-950 bg-[#e5a93c] hover:bg-[#f59e0b] shadow-md transition"
+              >
+                <span>Next</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         </div>
       </div>

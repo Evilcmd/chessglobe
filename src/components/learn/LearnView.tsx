@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
   GraduationCap,
-  ArrowLeft,
+  X,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
@@ -10,8 +10,7 @@ import {
   List,
   Sparkles,
   HelpCircle,
-  Play,
-  Pause
+  Play
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { Repertoire, EngineSettings } from '../../types';
@@ -53,7 +52,6 @@ export const LearnView: React.FC<LearnViewProps> = ({
   });
   const [showLinesModal, setShowLinesModal] = useState<boolean>(false);
   const [isFlippedManual, setIsFlippedManual] = useState<boolean>(repertoire.color === 'black');
-  const [isAutoPlaying, setIsAutoPlaying] = useState<boolean>(false);
   const [wrongSquare, setWrongSquare] = useState<string | null>(null);
   const [showHintPulse, setShowHintPulse] = useState<boolean>(false);
   const [lineFinished, setLineFinished] = useState<boolean>(false);
@@ -99,7 +97,6 @@ export const LearnView: React.FC<LearnViewProps> = ({
 
     // 2. Engine best move arrow (if engine is enabled and best move arrow is toggled on)
     if (isEngineOn && engineSettings.showBestMoveArrow && engineEval.bestMove) {
-      // If different from hint arrow, show in blue
       const isSameAsHint =
         isPlayerTurn &&
         nextExpectedMove &&
@@ -262,7 +259,6 @@ export const LearnView: React.FC<LearnViewProps> = ({
 
   // Get current position comment
   const currentComment = useMemo(() => {
-    // Check if current move or previous move has comment
     if (moveIndex > 0 && moves[moveIndex - 1]?.comment) {
       return moves[moveIndex - 1].comment;
     }
@@ -272,66 +268,13 @@ export const LearnView: React.FC<LearnViewProps> = ({
     return null;
   }, [moveIndex, moves]);
 
-  // Overall learned count
-  const totalLearned = repertoire.lines.filter(l => l.learned).length;
-
   return (
-    <div className="flex flex-col min-h-screen bg-[#131722] text-slate-100">
-      {/* Top Navigation Bar */}
-      <header className="flex items-center justify-between px-6 py-3 border-b border-[#242b3c] bg-[#181d2a]">
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={onBack}
-            className="flex items-center space-x-1.5 text-xs font-semibold text-slate-400 hover:text-white bg-[#202737] hover:bg-[#2a3449] px-3 py-1.5 rounded-lg border border-[#2e374d] transition"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Repertoire</span>
-          </button>
-
-          <div className="flex items-center space-x-2">
-            <span className="p-1 rounded-md bg-[#e5a93c]/15 text-[#e5a93c]">
-              <GraduationCap className="w-4 h-4" />
-            </span>
-            <span className="text-sm font-bold text-white">Learn</span>
-            <span className="text-xs text-slate-400 font-medium">
-              • {repertoire.name}
-            </span>
-          </div>
-        </div>
-
-        {/* Line indicator and quick tools */}
-        <div className="flex items-center space-x-3">
-          <button
-            onClick={() => setShowLinesModal(true)}
-            className="flex items-center space-x-2 text-xs font-semibold text-slate-300 hover:text-white bg-[#22293b] hover:bg-[#2b354d] px-3 py-1.5 rounded-lg border border-[#2d374d] transition"
-          >
-            <List className="w-3.5 h-3.5" />
-            <span>All Lines ({lineIndex + 1}/{repertoire.lines.length})</span>
-          </button>
-
-          <button
-            onClick={() => setIsFlippedManual(!isFlippedManual)}
-            title="Flip Board (White / Black)"
-            className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#242b3d] transition border border-[#2e374d]"
-          >
-            <FlipBoardIcon className="w-4 h-4" />
-          </button>
-        </div>
-      </header>
-
-      {/* Thin Line Progress Bar */}
-      <div className="w-full bg-[#1e2536] h-1.5 relative overflow-hidden">
-        <div
-          className="bg-emerald-500 h-full transition-all duration-300"
-          style={{ width: `${((lineIndex + 1) / repertoire.lines.length) * 100}%` }}
-        />
-      </div>
-
-      {/* Main Workspace (Board + Right Sidebar) - Generous Desktop Scaling */}
-      <div className="flex-1 flex flex-col lg:flex-row items-center lg:items-start justify-center p-4 sm:p-6 lg:p-8 gap-6 lg:gap-10 max-w-[1400px] mx-auto w-full">
-        {/* Left / Center: Chessboard */}
-        <div className="flex flex-col items-center w-full max-w-[min(680px,80vh)] xl:max-w-[min(740px,82vh)]">
-          <div className="relative w-full">
+    <div className="h-screen max-h-screen w-screen overflow-hidden bg-[#0d111a] text-slate-100 flex items-center justify-center p-3 sm:p-4 lg:p-6 select-none">
+      {/* Main Container: Board on Left + Single Unified Card on Right (matching ChessAtlas Image 3) */}
+      <div className="flex flex-col lg:flex-row items-center lg:items-stretch justify-center gap-4 lg:gap-6 w-full max-w-[1550px] h-full max-h-full">
+        {/* Left Column: Full-Height Chessboard */}
+        <div className="h-full flex-1 min-w-0 max-h-full flex items-center justify-center relative">
+          <div className="relative h-full max-h-full flex items-center justify-center">
             <ChessBoard
               fen={currentFen}
               orientation={isFlippedManual ? 'black' : 'white'}
@@ -343,14 +286,14 @@ export const LearnView: React.FC<LearnViewProps> = ({
               showEvalBar={isEngineOn}
               evalScore={engineEval.evalScore}
               centipawns={engineEval.centipawns}
-              boardSize={engineSettings.boardSize}
+              className="h-full max-h-full"
             />
 
             {/* Line Finished Overlay Banner */}
             {lineFinished && (
-              <div className="absolute inset-0 bg-slate-950/75 backdrop-blur-xs flex flex-col items-center justify-center p-6 text-center rounded-md z-30 animate-fade-in">
-                <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mb-3">
-                  <Sparkles className="w-6 h-6" />
+              <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-xs flex flex-col items-center justify-center p-6 text-center rounded-xl z-30 animate-fade-in">
+                <div className="w-14 h-14 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mb-3 shadow-lg">
+                  <Sparkles className="w-7 h-7" />
                 </div>
                 <h3 className="text-xl font-bold text-white mb-1">
                   Line Complete!
@@ -386,155 +329,188 @@ export const LearnView: React.FC<LearnViewProps> = ({
           </div>
         </div>
 
-        {/* Right Sidebar (Comments, Speech Bubble Mascot, Engine Panel, Navigation) */}
-        <div className="w-full lg:w-[440px] xl:w-[480px] flex flex-col space-y-4">
-          {/* Header Card (Line title + 1/23 progress) */}
-          <div className="bg-[#181d2a] border border-[#2b3347] rounded-xl p-4 shadow-md">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center space-x-2">
-                <span className="text-xs font-mono font-bold bg-[#e5a93c]/20 text-[#e5a93c] px-2 py-0.5 rounded">
-                  Line {lineIndex + 1}/{repertoire.lines.length}
-                </span>
-                <span className="text-xs text-slate-400">
-                  Move {moveIndex} of {moves.length}
-                </span>
+        {/* Right Column: Unified Card (Top Header, Progress, Middle Speech Bubble, Bottom Engine & Controls) */}
+        <div className="w-full lg:w-[440px] xl:w-[480px] h-full max-h-full flex flex-col justify-between bg-[#161c28] border border-[#263043] rounded-2xl shadow-2xl p-5 overflow-hidden flex-shrink-0">
+          {/* 1. Card Top Header (matches Image 3) */}
+          <div className="flex items-center justify-between pb-3 border-b border-[#242c3f]">
+            {/* Left: Mode Badge & Title */}
+            <div className="flex items-center space-x-3 min-w-0">
+              <div className="w-9 h-9 rounded-xl bg-[#e5a93c]/15 text-[#e5a93c] flex items-center justify-center flex-shrink-0 border border-[#e5a93c]/25">
+                <GraduationCap className="w-5 h-5" />
               </div>
+              <div className="min-w-0">
+                <div className="text-sm font-bold text-white leading-tight">Learn</div>
+                <div className="text-xs text-slate-400 font-medium truncate max-w-[210px]">
+                  {currentLine.name}
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Actions (Flip, All Lines, Exit) */}
+            <div className="flex items-center space-x-1.5 flex-shrink-0">
+              <button
+                onClick={() => setIsFlippedManual(!isFlippedManual)}
+                title="Flip Board (White / Black)"
+                className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#202739] transition border border-transparent hover:border-[#2d374e]"
+              >
+                <FlipBoardIcon className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setShowLinesModal(true)}
+                title="All Lines"
+                className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#202739] transition border border-transparent hover:border-[#2d374e]"
+              >
+                <List className="w-4 h-4" />
+              </button>
+              <button
+                onClick={onBack}
+                title="Exit to Repertoire"
+                className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#202739] transition border border-transparent hover:border-[#2d374e]"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* 2. Progress Bar & Line Index */}
+          <div className="flex items-center space-x-3 pt-3 pb-1">
+            <div className="flex-1 bg-[#1e2536] h-1.5 rounded-full overflow-hidden">
+              <div
+                className="bg-emerald-500 h-full transition-all duration-300 rounded-full"
+                style={{ width: `${((lineIndex + 1) / repertoire.lines.length) * 100}%` }}
+              />
+            </div>
+            <span className="text-xs font-mono font-semibold text-slate-400 flex-shrink-0">
+              {lineIndex + 1}/{repertoire.lines.length}
+            </span>
+          </div>
+
+          {/* 3. Middle Section: Speech Bubble with Bird Mascot (matches Image 3) */}
+          <div className="flex-1 min-h-0 overflow-y-auto py-2 flex flex-col justify-center">
+            <div className="flex items-start space-x-3">
+              {/* Mascot Bird Avatar */}
+              <div className="w-11 h-11 flex-shrink-0 rounded-full bg-[#1b2131] border border-[#2b354b] p-1 flex items-center justify-center shadow-md">
+                <img
+                  src="/mascot.svg"
+                  alt="ChessAtlas Mascot"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+
+              {/* Speech Bubble (White background, rounded card, tail pointing left to mascot) */}
+              <div className="flex-1 bg-white text-slate-800 rounded-2xl rounded-tl-sm p-4 relative shadow-lg border border-slate-100 max-h-[300px] overflow-y-auto">
+                <div className="absolute top-3 -left-2 w-2.5 h-2.5 bg-white transform rotate-45 border-l border-b border-slate-100" />
+
+                {currentComment ? (
+                  <p className="text-[13px] leading-relaxed font-sans text-slate-800 whitespace-pre-line selection:bg-amber-100">
+                    {currentComment}
+                  </p>
+                ) : (
+                  <div className="text-[13px] leading-relaxed text-slate-700">
+                    {isPlayerTurn && nextExpectedMove ? (
+                      <span>
+                        Play <strong className="text-amber-600 font-mono font-bold">{nextExpectedMove.san}</strong> on the board to proceed with the line.
+                      </span>
+                    ) : (
+                      <span>
+                        Follow the line and observe the move carefully.
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* 4. Bottom Section: Stockfish Engine Panel + Step Navigation Controls */}
+          <div className="flex flex-col space-y-3 pt-3 border-t border-[#242c3f]">
+            {/* Engine Panel */}
+            <EnginePanel
+              enabled={isEngineOn}
+              onToggle={handleEngineToggle}
+              evaluation={engineEval}
+              settings={engineSettings}
+              onUpdateSettings={onUpdateEngineSettings}
+              onExtendDepth={() => {
+                const newDepth = Math.min(32, engineSettings.depth + 4);
+                onUpdateEngineSettings({ ...engineSettings, depth: newDepth });
+                engineService.setDepth(newDepth);
+              }}
+            />
+
+            {/* Move & Navigation Bar */}
+            <div className="flex items-center justify-between bg-[#1e2538] border border-[#2b354c] rounded-xl px-3 py-2">
+              {/* Step Controls: << < > >> */}
               <div className="flex items-center space-x-1">
                 <button
-                  onClick={handlePrevLine}
-                  disabled={lineIndex === 0}
-                  title="Previous Line"
-                  className="p-1 rounded text-slate-400 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition"
+                  onClick={goToFirstMove}
+                  disabled={moveIndex === 0}
+                  title="First Move (<<)"
+                  className="p-1.5 text-slate-400 hover:text-white disabled:opacity-30 disabled:pointer-events-none rounded-lg hover:bg-[#283248] transition"
+                >
+                  <ChevronsLeft className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={goToPrevMove}
+                  disabled={moveIndex === 0}
+                  title="Previous Move (< / Left Arrow)"
+                  className="p-1.5 text-slate-400 hover:text-white disabled:opacity-30 disabled:pointer-events-none rounded-lg hover:bg-[#283248] transition"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
+                <span className="text-[11px] font-mono text-slate-400 px-1.5">
+                  {moveIndex}/{moves.length}
+                </span>
                 <button
-                  onClick={handleNextLine}
-                  disabled={lineIndex >= repertoire.lines.length - 1}
-                  title="Next Line"
-                  className="p-1 rounded text-slate-400 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition"
+                  onClick={goToNextMove}
+                  disabled={moveIndex >= moves.length}
+                  title="Next Move (> / Right Arrow)"
+                  className="p-1.5 text-slate-400 hover:text-white disabled:opacity-30 disabled:pointer-events-none rounded-lg hover:bg-[#283248] transition"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
+                <button
+                  onClick={goToLastMove}
+                  disabled={moveIndex >= moves.length}
+                  title="Last Move (>>)"
+                  className="p-1.5 text-slate-400 hover:text-white disabled:opacity-30 disabled:pointer-events-none rounded-lg hover:bg-[#283248] transition"
+                >
+                  <ChevronsRight className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Hint & Reset & Next Line */}
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => {
+                    setShowHintPulse(true);
+                    setTimeout(() => setShowHintPulse(false), 1200);
+                  }}
+                  className="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white bg-[#252e42] hover:bg-[#2e3952] border border-[#313c54] transition"
+                >
+                  <HelpCircle className="w-3.5 h-3.5 text-[#e5a93c]" />
+                  <span>Hint</span>
+                </button>
+                <button
+                  onClick={handleResetLine}
+                  title="Replay Line"
+                  className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-[#283248] transition"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                </button>
+                {lineFinished && lineIndex < repertoire.lines.length - 1 && (
+                  <button
+                    onClick={handleNextLine}
+                    title="Next Line"
+                    className="flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-950 bg-[#e5a93c] hover:bg-[#f59e0b] shadow-md transition"
+                  >
+                    <span>Next</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
             </div>
-
-            <h3 className="text-base font-bold text-white truncate">
-              {currentLine.name}
-            </h3>
-            <p className="text-xs text-slate-400 font-mono truncate mt-0.5">
-              {currentLine.keyMovesSummary}
-            </p>
           </div>
-
-          {/* Speech Bubble with Bird Mascot (matches Image 3) */}
-          <div className="flex items-start space-x-3 bg-[#181d2a] border border-[#2b3347] rounded-2xl p-4 min-h-[140px] shadow-md">
-            {/* Mascot Avatar */}
-            <div className="w-11 h-11 flex-shrink-0 rounded-full bg-[#1e2434] border border-[#2e374d] p-1 flex items-center justify-center">
-              <img
-                src="/mascot.svg"
-                alt="ChessAtlas Mascot"
-                className="w-full h-full object-contain"
-              />
-            </div>
-
-            {/* Speech Bubble */}
-            <div className="flex-1 bg-[#1e2433] border border-[#2e374e] rounded-2xl rounded-tl-none p-3.5 relative shadow-sm">
-              <div className="absolute top-2 -left-2 w-2 h-2 bg-[#1e2433] border-l border-b border-[#2e374e] transform rotate-45" />
-
-              {currentComment ? (
-                <p className="text-xs text-slate-200 leading-relaxed font-sans whitespace-pre-line">
-                  {currentComment}
-                </p>
-              ) : (
-                <div className="text-xs text-slate-400 leading-relaxed">
-                  {isPlayerTurn && nextExpectedMove ? (
-                    <span>
-                      Play <strong className="text-[#e5a93c]">{nextExpectedMove.san}</strong> on the board to proceed with the line.
-                    </span>
-                  ) : (
-                    <span>
-                      Follow the line and watch opponent responses carefully.
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Move Navigation Controls (user requirement: go back or forth in moves) */}
-          <div className="bg-[#181d2a] border border-[#2b3347] rounded-xl p-3 flex items-center justify-between shadow-md">
-            {/* Step Controls */}
-            <div className="flex items-center space-x-1">
-              <button
-                onClick={goToFirstMove}
-                disabled={moveIndex === 0}
-                title="First Move (<<)"
-                className="p-2 text-slate-400 hover:text-white disabled:opacity-30 disabled:pointer-events-none rounded-lg hover:bg-[#242b3d] transition"
-              >
-                <ChevronsLeft className="w-4 h-4" />
-              </button>
-              <button
-                onClick={goToPrevMove}
-                disabled={moveIndex === 0}
-                title="Previous Move (< / Left Arrow)"
-                className="p-2 text-slate-400 hover:text-white disabled:opacity-30 disabled:pointer-events-none rounded-lg hover:bg-[#242b3d] transition"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button
-                onClick={goToNextMove}
-                disabled={moveIndex >= moves.length}
-                title="Next Move (> / Right Arrow)"
-                className="p-2 text-slate-400 hover:text-white disabled:opacity-30 disabled:pointer-events-none rounded-lg hover:bg-[#242b3d] transition"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-              <button
-                onClick={goToLastMove}
-                disabled={moveIndex >= moves.length}
-                title="Last Move (>>)"
-                className="p-2 text-slate-400 hover:text-white disabled:opacity-30 disabled:pointer-events-none rounded-lg hover:bg-[#242b3d] transition"
-              >
-                <ChevronsRight className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Reset / Hint Controls */}
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() => {
-                  setShowHintPulse(true);
-                  setTimeout(() => setShowHintPulse(false), 1200);
-                }}
-                className="flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white bg-[#22293b] hover:bg-[#2a3449] border border-[#2d374d] transition"
-              >
-                <HelpCircle className="w-3.5 h-3.5 text-[#e5a93c]" />
-                <span>Hint</span>
-              </button>
-              <button
-                onClick={handleResetLine}
-                title="Reset Line"
-                className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#242b3d] transition"
-              >
-                <RotateCcw className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* Engine Panel at bottom (matches Image 4 & 5) */}
-          <EnginePanel
-            enabled={isEngineOn}
-            onToggle={handleEngineToggle}
-            evaluation={engineEval}
-            settings={engineSettings}
-            onUpdateSettings={onUpdateEngineSettings}
-            onExtendDepth={() => {
-              const newDepth = Math.min(32, engineSettings.depth + 4);
-              onUpdateEngineSettings({ ...engineSettings, depth: newDepth });
-              engineService.setDepth(newDepth);
-            }}
-          />
         </div>
       </div>
 
