@@ -16,6 +16,7 @@ import {
 import confetti from 'canvas-confetti';
 import { Repertoire, EngineSettings } from '../../types';
 import { ChessBoard, ArrowData } from '../chess/ChessBoard';
+import { FlipBoardIcon } from '../icons/FlipBoardIcon';
 import { EnginePanel } from '../engine/EnginePanel';
 import { LinesListModal } from '../lines/LinesListModal';
 import { engineService, EngineEvaluation } from '../../utils/stockfishService';
@@ -310,10 +311,10 @@ export const LearnView: React.FC<LearnViewProps> = ({
 
           <button
             onClick={() => setIsFlippedManual(!isFlippedManual)}
-            title="Flip Board"
-            className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#242b3d] transition"
+            title="Flip Board (White / Black)"
+            className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#242b3d] transition border border-[#2e374d]"
           >
-            <RotateCcw className="w-4 h-4" />
+            <FlipBoardIcon className="w-4 h-4" />
           </button>
         </div>
       </header>
@@ -326,10 +327,10 @@ export const LearnView: React.FC<LearnViewProps> = ({
         />
       </div>
 
-      {/* Main Workspace (Board + Right Sidebar) */}
-      <div className="flex-1 flex flex-col lg:flex-row items-center lg:items-start justify-center p-4 sm:p-6 gap-6 lg:gap-8 max-w-7xl mx-auto w-full">
+      {/* Main Workspace (Board + Right Sidebar) - Generous Desktop Scaling */}
+      <div className="flex-1 flex flex-col lg:flex-row items-center lg:items-start justify-center p-4 sm:p-6 lg:p-8 gap-6 lg:gap-10 max-w-[1400px] mx-auto w-full">
         {/* Left / Center: Chessboard */}
-        <div className="flex flex-col items-center w-full max-w-[560px]">
+        <div className="flex flex-col items-center w-full max-w-[min(680px,80vh)] xl:max-w-[min(740px,82vh)]">
           <div className="relative w-full">
             <ChessBoard
               fen={currentFen}
@@ -386,7 +387,7 @@ export const LearnView: React.FC<LearnViewProps> = ({
         </div>
 
         {/* Right Sidebar (Comments, Speech Bubble Mascot, Engine Panel, Navigation) */}
-        <div className="w-full lg:w-[440px] flex flex-col space-y-4">
+        <div className="w-full lg:w-[440px] xl:w-[480px] flex flex-col space-y-4">
           {/* Header Card (Line title + 1/23 progress) */}
           <div className="bg-[#181d2a] border border-[#2b3347] rounded-xl p-4 shadow-md">
             <div className="flex items-center justify-between mb-2">

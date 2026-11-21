@@ -60,6 +60,27 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   const displayFiles = useMemo(() => (isFlipped ? [...FILES].reverse() : FILES), [isFlipped]);
   const displayRanks = useMemo(() => (isFlipped ? [...RANKS].reverse() : RANKS), [isFlipped]);
 
+  // Smooth piece sliding animation for moves
+  const [animatingMove, setAnimatingMove] = useState<{ from: string; to: string; active: boolean } | null>(null);
+
+  useEffect(() => {
+    if (lastMove && lastMove.from && lastMove.to) {
+      setAnimatingMove({ from: lastMove.from, to: lastMove.to, active: false });
+      const frame = requestAnimationFrame(() => {
+        setAnimatingMove({ from: lastMove.from, to: lastMove.to, active: true });
+      });
+      const timer = setTimeout(() => {
+        setAnimatingMove(null);
+      }, 270);
+      return () => {
+        cancelAnimationFrame(frame);
+        clearTimeout(timer);
+      };
+    } else {
+      setAnimatingMove(null);
+    }
+  }, [lastMove?.from, lastMove?.to]);
+
   // Compute 2D board state
   const boardState = useMemo(() => {
     const map: Record<string, { type: string; color: 'w' | 'b' }> = {};
@@ -365,14 +386,35 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
                   )}
 
                   {/* Piece */}
-                  {piece && !isDragged && (
-                    <div className="w-[88%] h-[88%] flex items-center justify-center z-10 transition-transform duration-75">
-                      {(() => {
-                        const PieceComp = ChessPieces[`${piece.color}${piece.type}`];
-                        return PieceComp ? <PieceComp className="w-full h-full drop-shadow-[0_2px_4px_rgba(0,0,0,0.35)]" /> : null;
-                      })()}
-                    </div>
-                  )}
+                  {piece && !isDragged && (() => {
+                    const isAnimatingPiece = animatingMove && animatingMove.to === sq;
+                    let animStyle: React.CSSProperties | undefined;
+                    if (isAnimatingPiece) {
+                      const fromCol = displayFiles.indexOf(animatingMove.from[0]);
+                      const fromRow = displayRanks.indexOf(animatingMove.from[1]);
+                      const toCol = displayFiles.indexOf(animatingMove.to[0]);
+                      const toRow = displayRanks.indexOf(animatingMove.to[1]);
+                      const deltaX = (fromCol - toCol) * 100;
+                      const deltaY = (fromRow - toRow) * 100;
+                      animStyle = {
+                        transform: animatingMove.active ? 'translate(0px, 0px)' : `translate(${deltaX}%, ${deltaY}%)`,
+                        transition: animatingMove.active ? 'transform 240ms cubic-bezier(0.2, 0, 0.2, 1)' : 'none',
+                        zIndex: 25
+                      };
+                    }
+
+                    const PieceComp = ChessPieces[`${piece.color}${piece.type}`];
+                    return (
+                      <div
+                        style={animStyle}
+                        className={`w-[88%] h-[88%] flex items-center justify-center transition-transform duration-75 ${
+                          isAnimatingPiece ? 'z-20 pointer-events-none' : 'z-10'
+                        }`}
+                      >
+                        {PieceComp ? <PieceComp className="w-full h-full drop-shadow-[0_2px_4px_rgba(0,0,0,0.35)]" /> : null}
+                      </div>
+                    );
+                  })()}
 
                   {/* Board Coordinates on Edge Squares (Lichess style) */}
                   {colIdx === 0 && (

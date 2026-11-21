@@ -1,11 +1,17 @@
-// Audio synthesizer using Web Audio API for offline, latency-free, Lichess-style sounds
+// Authentic Lichess sound service with zero-latency Web Audio buffer caching and fallback
 
 class SoundService {
   private ctx: AudioContext | null = null;
+  private buffers: Record<string, AudioBuffer> = {};
   private enabled: boolean = true;
+  private soundTheme: 'lichess' = 'lichess';
 
   constructor() {
-    // AudioContext will be initialized on first user interaction
+    if (typeof window !== 'undefined') {
+      // Lazy load sound files on first interaction
+      window.addEventListener('click', () => this.initBuffers(), { once: true });
+      window.addEventListener('keydown', () => this.initBuffers(), { once: true });
+    }
   }
 
   private getContext(): AudioContext | null {
@@ -22,6 +28,30 @@ class SoundService {
     return this.ctx;
   }
 
+  private async loadBuffer(name: string, url: string) {
+    const ctx = this.getContext();
+    if (!ctx) return;
+    try {
+      const resp = await fetch(url);
+      if (!resp.ok) return;
+      const arrayBuffer = await resp.arrayBuffer();
+      const decoded = await ctx.decodeAudioData(arrayBuffer);
+      this.buffers[name] = decoded;
+    } catch (_) {
+      // Fallback synthesizer will be used
+    }
+  }
+
+  private initBuffers() {
+    const ctx = this.getContext();
+    if (!ctx) return;
+    this.loadBuffer('move', '/sounds/Move.mp3');
+    this.loadBuffer('capture', '/sounds/Capture.mp3');
+    this.loadBuffer('check', '/sounds/Check.mp3');
+    this.loadBuffer('error', '/sounds/Error.mp3');
+    this.loadBuffer('success', '/sounds/Confirmation.mp3');
+  }
+
   public setEnabled(val: boolean) {
     this.enabled = val;
   }
@@ -30,165 +60,140 @@ class SoundService {
     return this.enabled;
   }
 
-  // Realistic wooden piece move knock
+  private playBuffer(name: string, volume: number = 0.85): boolean {
+    if (!this.enabled) return true;
+    const ctx = this.getContext();
+    if (!ctx) return false;
+
+    const buffer = this.buffers[name];
+    if (buffer) {
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(volume, ctx.currentTime);
+      source.connect(gain);
+      gain.connect(ctx.destination);
+      source.start();
+      return true;
+    }
+
+    // Try HTMLAudioElement directly if buffer not yet decoded
+    try {
+      const map: Record<string, string> = {
+        move: '/sounds/Move.mp3',
+        capture: '/sounds/Capture.mp3',
+        check: '/sounds/Check.mp3',
+        error: '/sounds/Error.mp3',
+        success: '/sounds/Confirmation.mp3'
+      };
+      if (map[name]) {
+        const a = new Audio(map[name]);
+        a.volume = volume;
+        a.play().catch(() => {});
+        return true;
+      }
+    } catch (_) {}
+
+    return false;
+  }
+
   public playMove() {
-    if (!this.enabled) return;
+    if (this.playBuffer('move', 0.9)) return;
+    this.synthMove();
+  }
+
+  public playCapture() {
+    if (this.playBuffer('capture', 1.0)) return;
+    this.synthCapture();
+  }
+
+  public playCheck() {
+    if (this.playBuffer('check', 0.9)) return;
+    this.playMove();
+  }
+
+  public playCastle() {
+    this.playMove();
+    setTimeout(() => this.playMove(), 120);
+  }
+
+  public playWrong() {
+    if (this.playBuffer('error', 0.8)) return;
+    this.synthWrong();
+  }
+
+  public playSuccess() {
+    if (this.playBuffer('success', 0.9)) return;
+    this.synthSuccess();
+  }
+
+  // Synthesizer fallbacks if offline / before audio loads
+  private synthMove() {
     const ctx = this.getContext();
     if (!ctx) return;
-
     const now = ctx.currentTime;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-
     osc.type = 'triangle';
-    osc.frequency.setValueAtTime(280, now);
+    osc.frequency.setValueAtTime(320, now);
     osc.frequency.exponentialRampToValueAtTime(80, now + 0.08);
-
     gain.gain.setValueAtTime(0.6, now);
     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
-
-    // Noise burst for the wooden knock texture
-    const bufferSize = ctx.sampleRate * 0.04;
-    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.01));
-    }
-    const noise = ctx.createBufferSource();
-    noise.buffer = buffer;
-    const noiseGain = ctx.createGain();
-    noiseGain.gain.setValueAtTime(0.25, now);
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
-
     osc.connect(gain);
     gain.connect(ctx.destination);
-    noise.connect(noiseGain);
-    noiseGain.connect(ctx.destination);
-
     osc.start(now);
-    noise.start(now);
     osc.stop(now + 0.09);
-    noise.stop(now + 0.05);
   }
 
-  // Sharper wooden capture snap
-  public playCapture() {
-    if (!this.enabled) return;
+  private synthCapture() {
     const ctx = this.getContext();
     if (!ctx) return;
-
     const now = ctx.currentTime;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(450, now);
-    osc.frequency.exponentialRampToValueAtTime(110, now + 0.11);
-
-    gain.gain.setValueAtTime(0.8, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.11);
-
-    const bufferSize = ctx.sampleRate * 0.06;
-    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.015));
-    }
-    const noise = ctx.createBufferSource();
-    noise.buffer = buffer;
-    const noiseGain = ctx.createGain();
-    noiseGain.gain.setValueAtTime(0.4, now);
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    noise.connect(noiseGain);
-    noiseGain.connect(ctx.destination);
-
-    osc.start(now);
-    noise.start(now);
-    osc.stop(now + 0.12);
-    noise.stop(now + 0.07);
-  }
-
-  // Castle double tap
-  public playCastle() {
-    if (!this.enabled) return;
-    this.playMove();
-    setTimeout(() => {
-      this.playMove();
-    }, 130);
-  }
-
-  // Check alert chime
-  public playCheck() {
-    if (!this.enabled) return;
-    const ctx = this.getContext();
-    if (!ctx) return;
-
-    this.playMove();
-    const now = ctx.currentTime + 0.04;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(580, now);
-    osc.frequency.exponentialRampToValueAtTime(720, now + 0.15);
-
-    gain.gain.setValueAtTime(0.25, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-
+    osc.frequency.setValueAtTime(480, now);
+    osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
+    gain.gain.setValueAtTime(0.7, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
     osc.connect(gain);
     gain.connect(ctx.destination);
     osc.start(now);
-    osc.stop(now + 0.26);
+    osc.stop(now + 0.11);
   }
 
-  // Wrong move buzzer / thud
-  public playWrong() {
-    if (!this.enabled) return;
+  private synthWrong() {
     const ctx = this.getContext();
     if (!ctx) return;
-
     const now = ctx.currentTime;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-
     osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(140, now);
-    osc.frequency.exponentialRampToValueAtTime(80, now + 0.22);
-
+    osc.frequency.setValueAtTime(150, now);
+    osc.frequency.exponentialRampToValueAtTime(80, now + 0.2);
     gain.gain.setValueAtTime(0.3, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
-
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
     osc.connect(gain);
     gain.connect(ctx.destination);
     osc.start(now);
-    osc.stop(now + 0.23);
+    osc.stop(now + 0.21);
   }
 
-  // Success / mastered line chime
-  public playSuccess() {
-    if (!this.enabled) return;
+  private synthSuccess() {
     const ctx = this.getContext();
     if (!ctx) return;
-
-    const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
-    notes.forEach((freq, i) => {
-      const now = ctx.currentTime + i * 0.08;
+    [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+      const now = ctx.currentTime + i * 0.07;
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-
       osc.type = 'sine';
       osc.frequency.setValueAtTime(freq, now);
-
       gain.gain.setValueAtTime(0.25, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
-
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
       osc.connect(gain);
       gain.connect(ctx.destination);
       osc.start(now);
-      osc.stop(now + 0.25);
+      osc.stop(now + 0.22);
     });
   }
 }

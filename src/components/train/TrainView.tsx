@@ -13,12 +13,14 @@ import {
 import confetti from 'canvas-confetti';
 import { Repertoire } from '../../types';
 import { ChessBoard, ArrowData } from '../chess/ChessBoard';
+import { FlipBoardIcon } from '../icons/FlipBoardIcon';
 import { sound } from '../../utils/sound';
 import { updateLineStatus, resetTrainingProgress } from '../../utils/storage';
 
 interface TrainViewProps {
   repertoire: Repertoire;
   onBack: () => void;
+  onUpdateRepertoire?: () => void;
   boardSize?: number;
 }
 
@@ -27,8 +29,17 @@ const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 export const TrainView: React.FC<TrainViewProps> = ({
   repertoire,
   onBack,
-  boardSize = 560
+  onUpdateRepertoire,
+  boardSize = 640
 }) => {
+  // Reactive tracking of trained line IDs so mastered count updates instantly in real time
+  const [trainedLineIds, setTrainedLineIds] = useState<Set<string>>(
+    () => new Set(repertoire.lines.filter(l => l.trained).map(l => l.id))
+  );
+
+  // Board orientation state (default straight for white, flipped for black)
+  const [isFlippedManual, setIsFlippedManual] = useState<boolean>(repertoire.color === 'black');
+
   // Build initial queue of untrained line indices (or all lines if all are trained)
   const initialQueue = useMemo(() => {
     const untrainedIndices = repertoire.lines
@@ -44,7 +55,10 @@ export const TrainView: React.FC<TrainViewProps> = ({
   const [queue, setQueue] = useState<number[]>(initialQueue);
   const [currentLineIndex, setCurrentLineIndex] = useState<number>(initialQueue[0] ?? 0);
   const [moveIndex, setMoveIndex] = useState<number>(0);
-  const [hasMadeMistake, setHasMadeMistake] = useState<boolean>(false);
+
+  // Separate line-level mistake tracking from current-move mistake UI
+  const [lineHasMistake, setLineHasMistake] = useState<boolean>(false);
+  const [showMistakeUI, setShowMistakeUI] = useState<boolean>(false);
   const [showMoveRevealed, setShowMoveRevealed] = useState<boolean>(false);
   const [wrongSquare, setWrongSquare] = useState<string | null>(null);
   const [lineFinished, setLineFinished] = useState<boolean>(false);
@@ -76,7 +90,7 @@ export const TrainView: React.FC<TrainViewProps> = ({
 
   const isPlayerTurn = nextExpectedMove ? nextExpectedMove.color === playerColor : false;
 
-  // In training, arrows are HIDDEN by default to test memory, and appear ONLY when "Show Move" is clicked
+  // In training, arrows are HIDDEN by default and appear ONLY when "Show Move" is clicked
   const boardArrows = useMemo(() => {
     const list: ArrowData[] = [];
     if (showMoveRevealed && isPlayerTurn && nextExpectedMove) {
@@ -104,21 +118,25 @@ export const TrainView: React.FC<TrainViewProps> = ({
             sound.playMove();
           }
           setMoveIndex(prev => prev + 1);
-        }, 350);
+        }, 360);
         return () => clearTimeout(timer);
       }
     } else if (moves.length > 0 && moveIndex === moves.length && !lineFinished) {
       // Completed current line!
       setLineFinished(true);
 
-      if (!hasMadeMistake && !showMoveRevealed) {
+      if (!lineHasMistake && !showMoveRevealed) {
         // Line solved CLEANLY!
         setSolvedSuccessfully(true);
         sound.playSuccess();
         updateLineStatus(repertoire.id, currentLine.id, { trained: true });
 
+        // Update local trained set so count updates immediately
+        setTrainedLineIds(prev => new Set([...prev, currentLine.id]));
+        onUpdateRepertoire?.();
+
         confetti({
-          particleCount: 60,
+          particleCount: 65,
           spread: 70,
           origin: { y: 0.6 }
         });
@@ -142,7 +160,19 @@ export const TrainView: React.FC<TrainViewProps> = ({
         });
       }
     }
-  }, [moveIndex, moves, playerColor, lineFinished, hasMadeMistake, showMoveRevealed, currentLineIndex, repertoire.id, currentLine?.id, allMastered]);
+  }, [
+    moveIndex,
+    moves,
+    playerColor,
+    lineFinished,
+    lineHasMistake,
+    showMoveRevealed,
+    currentLineIndex,
+    repertoire.id,
+    currentLine?.id,
+    allMastered,
+    onUpdateRepertoire
+  ]);
 
   // Handle user making a move
   const handleUserMove = (from: string, to: string) => {
@@ -160,11 +190,17 @@ export const TrainView: React.FC<TrainViewProps> = ({
         }
         setMoveIndex(prev => prev + 1);
         setWrongSquare(null);
+
+        // Hide "Show Move" button and arrow on correct move!
+        setShowMistakeUI(false);
+        setShowMoveRevealed(false);
       } else {
         // Wrong move!
         sound.playWrong();
         setWrongSquare(from);
-        setHasMadeMistake(true);
+        setLineHasMistake(true);
+        setShowMistakeUI(true); // Show button for this move!
+
         // Mark line as untrained and record mistake immediately
         updateLineStatus(repertoire.id, currentLine.id, { mistake: true, trained: false });
         setTimeout(() => setWrongSquare(null), 500);
@@ -183,7 +219,8 @@ export const TrainView: React.FC<TrainViewProps> = ({
     const nextIdx = queue[0];
     setCurrentLineIndex(nextIdx);
     setMoveIndex(0);
-    setHasMadeMistake(false);
+    setLineHasMistake(false);
+    setShowMistakeUI(false);
     setShowMoveRevealed(false);
     setLineFinished(false);
     setSolvedSuccessfully(false);
@@ -193,8 +230,7 @@ export const TrainView: React.FC<TrainViewProps> = ({
   // Reveal correct move when user clicks "Show Move"
   const handleShowMove = () => {
     setShowMoveRevealed(true);
-    setHasMadeMistake(true);
-    // As per prompt: "marked as untrained and kept in rotation as soon as i make a mistake"
+    setLineHasMistake(true);
     updateLineStatus(repertoire.id, currentLine.id, { mistake: true, trained: false });
   };
 
@@ -202,22 +238,25 @@ export const TrainView: React.FC<TrainViewProps> = ({
   const handleResetTraining = () => {
     resetTrainingProgress(repertoire.id);
     const allIndices = repertoire.lines.map((_, i) => i).sort(() => Math.random() - 0.5);
+    setTrainedLineIds(new Set());
+    onUpdateRepertoire?.();
     setQueue(allIndices);
     setCurrentLineIndex(allIndices[0]);
     setMoveIndex(0);
-    setHasMadeMistake(false);
+    setLineHasMistake(false);
+    setShowMistakeUI(false);
     setShowMoveRevealed(false);
     setLineFinished(false);
     setAllMastered(false);
     setSolvedSuccessfully(false);
   };
 
-  const totalTrainedCount = repertoire.lines.filter(l => l.trained).length;
+  const totalTrainedCount = trainedLineIds.size;
 
   return (
     <div className="flex flex-col min-h-screen bg-[#131722] text-slate-100">
       {/* Top Header */}
-      <header className="flex items-center justify-between px-6 py-3 border-b border-[#242b3c] bg-[#181d2a]">
+      <header className="flex items-center justify-between px-6 py-3.5 border-b border-[#242b3c] bg-[#181d2a]">
         <div className="flex items-center space-x-4">
           <button
             onClick={onBack}
@@ -232,24 +271,33 @@ export const TrainView: React.FC<TrainViewProps> = ({
               <Target className="w-4 h-4" />
             </span>
             <span className="text-sm font-bold text-white">Train</span>
-            <span className="text-xs text-slate-400 font-medium">
+            <span className="text-xs text-slate-400 font-medium hidden sm:inline">
               • {repertoire.name}
             </span>
           </div>
         </div>
 
-        {/* Rotation queue status */}
+        {/* Rotation queue status & Flip board button */}
         <div className="flex items-center space-x-3">
           <span className="text-xs font-medium text-slate-300 bg-[#22293b] px-3 py-1.5 rounded-lg border border-[#2e374e]">
             Rotation Queue: <strong className="text-[#e5a93c]">{queue.length}</strong> remaining
           </span>
+
+          <button
+            onClick={() => setIsFlippedManual(!isFlippedManual)}
+            title="Flip Board (White / Black)"
+            className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-[#242b3d] transition border border-[#2e374d]"
+          >
+            <FlipBoardIcon className="w-4 h-4" />
+          </button>
+
           <button
             onClick={handleResetTraining}
             title="Reset Training Progress"
-            className="flex items-center space-x-1 text-xs font-medium text-slate-400 hover:text-white bg-[#202737] hover:bg-[#2a3449] px-2.5 py-1.5 rounded-lg border border-[#2e374d] transition"
+            className="hidden sm:flex items-center space-x-1 text-xs font-medium text-slate-400 hover:text-white bg-[#202737] hover:bg-[#2a3449] px-2.5 py-1.5 rounded-lg border border-[#2e374d] transition"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset Training</span>
+            <span>Reset</span>
           </button>
         </div>
       </header>
@@ -262,14 +310,14 @@ export const TrainView: React.FC<TrainViewProps> = ({
         />
       </div>
 
-      {/* Main Container */}
-      <div className="flex-1 flex flex-col lg:flex-row items-center lg:items-start justify-center p-4 sm:p-6 gap-6 lg:gap-8 max-w-6xl mx-auto w-full">
+      {/* Main Container - Generous Desktop Scaling */}
+      <div className="flex-1 flex flex-col lg:flex-row items-center lg:items-start justify-center p-4 sm:p-6 lg:p-8 gap-6 lg:gap-10 max-w-[1400px] mx-auto w-full">
         {/* Left / Center: Board */}
-        <div className="flex flex-col items-center w-full max-w-[560px]">
+        <div className="flex flex-col items-center w-full max-w-[min(680px,80vh)] xl:max-w-[min(740px,82vh)]">
           <div className="relative w-full">
             <ChessBoard
               fen={currentFen}
-              orientation={repertoire.color === 'black' ? 'black' : 'white'}
+              orientation={isFlippedManual ? 'black' : 'white'}
               arrows={boardArrows}
               interactive={!lineFinished && !allMastered}
               onMove={handleUserMove}
@@ -349,9 +397,9 @@ export const TrainView: React.FC<TrainViewProps> = ({
         </div>
 
         {/* Right Panel: Training Status & Controls */}
-        <div className="w-full lg:w-[380px] flex flex-col space-y-4">
+        <div className="w-full lg:w-[420px] xl:w-[460px] flex flex-col space-y-4">
           {/* Training Header Card */}
-          <div className="bg-[#181d2a] border border-[#2b3347] rounded-xl p-5 shadow-md">
+          <div className="bg-[#181d2a] border border-[#2b3347] rounded-2xl p-5 shadow-md">
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-mono font-bold bg-[#e5a93c]/20 text-[#e5a93c] px-2.5 py-1 rounded">
                 Line #{currentLineIndex + 1}
@@ -370,22 +418,22 @@ export const TrainView: React.FC<TrainViewProps> = ({
 
             <div className="mt-4 pt-4 border-t border-[#23293a] flex items-center justify-between text-xs">
               <span className="text-slate-400">Mastered Lines:</span>
-              <span className="font-bold text-emerald-400">
+              <span className="font-bold text-emerald-400 font-mono text-sm">
                 {totalTrainedCount} / {repertoire.lines.length} ({Math.round((totalTrainedCount / repertoire.lines.length) * 100)}%)
               </span>
             </div>
           </div>
 
           {/* Action Box: Training Instructions & "Show Move" Button */}
-          <div className="bg-[#181d2a] border border-[#2b3347] rounded-xl p-5 shadow-md flex flex-col items-center text-center">
-            {hasMadeMistake ? (
-              <div className="w-full">
+          <div className="bg-[#181d2a] border border-[#2b3347] rounded-2xl p-5 shadow-md flex flex-col items-center text-center">
+            {showMistakeUI ? (
+              <div className="w-full animate-fade-in">
                 <div className="flex items-center justify-center space-x-2 text-rose-400 text-xs font-semibold mb-3">
                   <AlertCircle className="w-4 h-4" />
                   <span>Incorrect move! You can keep trying.</span>
                 </div>
 
-                {/* Show Move Button (appears when a mistake is made) */}
+                {/* Show Move Button (disappears as soon as the correct move is played!) */}
                 <button
                   onClick={handleShowMove}
                   className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-[#262f44] hover:bg-[#323d57] text-[#e5a93c] border border-[#e5a93c]/40 font-bold text-xs rounded-xl transition shadow-md"
@@ -400,7 +448,7 @@ export const TrainView: React.FC<TrainViewProps> = ({
                   Make the correct opening move on the board from memory.
                 </p>
                 <p className="text-[11px] text-slate-500 mt-1">
-                  Opponent will reply automatically. Solve cleanly to master the line!
+                  Opponent will reply automatically with sound and smooth piece movement. Solve cleanly to master!
                 </p>
               </div>
             )}
@@ -412,6 +460,8 @@ export const TrainView: React.FC<TrainViewProps> = ({
             <button
               onClick={() => {
                 setMoveIndex(0);
+                setShowMistakeUI(false);
+                setShowMoveRevealed(false);
                 setLineFinished(false);
                 setWrongSquare(null);
               }}

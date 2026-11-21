@@ -137,6 +137,7 @@ export const App: React.FC = () => {
             reloadRepertoires();
             setCurrentView('detail');
           }}
+          onUpdateRepertoire={reloadRepertoires}
           boardSize={engineSettings.boardSize}
         />
       )}

@@ -104,8 +104,8 @@ export const EngineSettingsModal: React.FC<EngineSettingsModalProps> = ({
             </div>
             <input
               type="range"
-              min="420"
-              max="660"
+              min="440"
+              max="740"
               step="20"
               value={boardSize}
               onChange={(e) => setBoardSize(parseInt(e.target.value, 10))}
