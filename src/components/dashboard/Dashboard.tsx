@@ -31,11 +31,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onDeleteRepertoire,
   onRestoreDefaults
 }) => {
-  const [showArchived, setShowArchived] = useState(false);
   const [repertoireToDelete, setRepertoireToDelete] = useState<Repertoire | null>(null);
 
-  const whiteRepertoires = repertoires.filter(r => r.color === 'white' && (showArchived || !r.archived));
-  const blackRepertoires = repertoires.filter(r => r.color === 'black' && (showArchived || !r.archived));
+  const whiteRepertoires = repertoires.filter(r => r.color === 'white');
+  const blackRepertoires = repertoires.filter(r => r.color === 'black');
 
   return (
     <div className="min-h-screen bg-[#131722] text-slate-100 flex flex-col">
@@ -51,8 +50,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </h1>
         </div>
 
-        {/* Right tools: Show archived toggle, Restore Defaults & New repertoire button */}
-        <div className="flex items-center space-x-4">
+        {/* Right tools: Restore Defaults & New repertoire button */}
+        <div className="flex items-center space-x-3.5">
           <button
             onClick={onRestoreDefaults}
             title="Restore 4 Default Openings"
@@ -61,16 +60,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
             <span>Restore Defaults</span>
           </button>
-
-          <label className="flex items-center space-x-2 text-xs text-slate-400 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={showArchived}
-              onChange={(e) => setShowArchived(e.target.checked)}
-              className="rounded bg-[#202737] border-[#2e374d] text-[#e5a93c] focus:ring-0"
-            />
-            <span>Show archived</span>
-          </label>
 
           <button
             onClick={onOpenNewModal}
