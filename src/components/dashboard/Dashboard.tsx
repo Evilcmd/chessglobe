@@ -209,8 +209,10 @@ const RepertoireCard: React.FC<{
   const totalLines = repertoire.lines.length;
   const learnedCount = repertoire.lines.filter(l => l.learned).length;
   const trainedCount = repertoire.lines.filter(l => l.trained).length;
-  const progressPercent = totalLines > 0 ? Math.round((learnedCount / totalLines) * 100) : 0;
-  const isComplete = progressPercent === 100;
+  const learnedPercent = totalLines > 0 ? Math.round((learnedCount / totalLines) * 100) : 0;
+  const trainedPercent = totalLines > 0 ? Math.round((trainedCount / totalLines) * 100) : 0;
+  const isLearnComplete = learnedPercent === 100;
+  const isTrainComplete = trainedPercent === 100;
 
   return (
     <div
@@ -231,20 +233,30 @@ const RepertoireCard: React.FC<{
               </h3>
             </div>
 
-            {/* Book icon with count (e.g. 23/23 or 0/38) */}
-            <div className="flex items-center space-x-1.5 text-xs text-slate-400 mt-1">
-              <BookOpen className="w-3.5 h-3.5" />
-              <span>
-                {learnedCount}/{totalLines}
+            {/* Counts for learned and trained */}
+            <div className="flex items-center space-x-2 text-xs text-slate-400 mt-1">
+              <span className="flex items-center space-x-1 text-emerald-400 font-mono text-[11px]" title={`${learnedCount} of ${totalLines} learned`}>
+                <GraduationCap className="w-3 h-3 text-emerald-400" />
+                <span>{learnedCount}/{totalLines}</span>
+              </span>
+              <span className="text-slate-600">•</span>
+              <span className="flex items-center space-x-1 text-[#e5a93c] font-mono text-[11px]" title={`${trainedCount} of ${totalLines} trained`}>
+                <Target className="w-3 h-3 text-[#e5a93c]" />
+                <span>{trainedCount}/{totalLines}</span>
               </span>
             </div>
 
             {/* Subtitle status: e.g. "38 to learn" or "Review ready" */}
-            <div className="flex items-center space-x-1.5 text-[11px] text-slate-400 mt-1">
-              {isComplete ? (
+            <div className="flex items-center space-x-1.5 text-[11px] text-slate-400 mt-1.5">
+              {isLearnComplete && isTrainComplete ? (
                 <>
                   <Clock className="w-3 h-3 text-emerald-400" />
-                  <span className="text-emerald-400 font-medium">Review Ready</span>
+                  <span className="text-emerald-400 font-medium">100% Mastered</span>
+                </>
+              ) : isLearnComplete ? (
+                <>
+                  <Clock className="w-3 h-3 text-[#e5a93c]" />
+                  <span className="text-[#e5a93c] font-medium">{totalLines - trainedCount} to train</span>
                 </>
               ) : (
                 <>
@@ -256,41 +268,87 @@ const RepertoireCard: React.FC<{
           </div>
         </div>
 
-        {/* Right: Circular Progress Indicator & Delete button */}
-        <div className="flex flex-col items-end space-y-2">
+        {/* Right: Two Donut Progress Indicators (Learn & Train) & Delete button */}
+        <div className="flex flex-col items-end space-y-1.5 flex-shrink-0">
           <button
             onClick={(e) => {
               e.stopPropagation();
               onDelete();
             }}
             title="Delete opening"
-            className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
+            className="opacity-0 group-hover:opacity-100 p-1 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="w-3.5 h-3.5" />
           </button>
 
-          <div className="relative w-11 h-11 flex items-center justify-center">
-            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-              <path
-                className="text-[#242c3e]"
-                strokeWidth="3.2"
-                stroke="currentColor"
-                fill="none"
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-              />
-              <path
-                className={isComplete ? 'text-emerald-400' : 'text-[#e5a93c]'}
-                strokeDasharray={`${progressPercent}, 100`}
-                strokeWidth="3.2"
-                strokeLinecap="round"
-                stroke="currentColor"
-                fill="none"
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-              />
-            </svg>
-            <span className="absolute text-[10px] font-bold text-white font-mono">
-              {progressPercent}%
-            </span>
+          <div className="flex items-center space-x-2.5">
+            {/* Donut 1: Learn Progress (Emerald Green) */}
+            <div
+              className="flex flex-col items-center"
+              title={`Learn Progress: ${learnedCount}/${totalLines} lines (${learnedPercent}%)`}
+            >
+              <div className="relative w-10 h-10 flex items-center justify-center">
+                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                  <path
+                    className="text-[#242c3e]"
+                    strokeWidth="3.2"
+                    stroke="currentColor"
+                    fill="none"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  />
+                  <path
+                    className="text-emerald-400"
+                    strokeDasharray={`${learnedPercent}, 100`}
+                    strokeWidth="3.2"
+                    strokeLinecap="round"
+                    stroke="currentColor"
+                    fill="none"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  />
+                </svg>
+                <span className="absolute text-[10px] font-bold text-white font-mono">
+                  {learnedPercent}%
+                </span>
+              </div>
+              <span className="text-[10px] font-semibold text-emerald-400 mt-1 flex items-center space-x-0.5">
+                <GraduationCap className="w-3 h-3" />
+                <span>Learn</span>
+              </span>
+            </div>
+
+            {/* Donut 2: Train Progress (Amber / Gold) */}
+            <div
+              className="flex flex-col items-center"
+              title={`Train Progress: ${trainedCount}/${totalLines} lines (${trainedPercent}%)`}
+            >
+              <div className="relative w-10 h-10 flex items-center justify-center">
+                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                  <path
+                    className="text-[#242c3e]"
+                    strokeWidth="3.2"
+                    stroke="currentColor"
+                    fill="none"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  />
+                  <path
+                    className="text-[#e5a93c]"
+                    strokeDasharray={`${trainedPercent}, 100`}
+                    strokeWidth="3.2"
+                    strokeLinecap="round"
+                    stroke="currentColor"
+                    fill="none"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  />
+                </svg>
+                <span className="absolute text-[10px] font-bold text-white font-mono">
+                  {trainedPercent}%
+                </span>
+              </div>
+              <span className="text-[10px] font-semibold text-[#e5a93c] mt-1 flex items-center space-x-0.5">
+                <Target className="w-3 h-3" />
+                <span>Train</span>
+              </span>
+            </div>
           </div>
         </div>
       </div>
