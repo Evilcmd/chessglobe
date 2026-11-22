@@ -65,6 +65,7 @@ export const TrainView: React.FC<TrainViewProps> = ({
   const [lineFinished, setLineFinished] = useState<boolean>(false);
   const [allMastered, setAllMastered] = useState<boolean>(false);
   const [solvedSuccessfully, setSolvedSuccessfully] = useState<boolean>(false);
+  const [showResetModal, setShowResetModal] = useState<boolean>(false);
 
   const currentLine = repertoire.lines[currentLineIndex] || repertoire.lines[0];
   const moves = currentLine?.moves || [];
@@ -250,21 +251,24 @@ export const TrainView: React.FC<TrainViewProps> = ({
 
   // Reset all training progress for this repertoire
   const handleResetTraining = () => {
-    if (confirm('Reset all training progress for this repertoire? All lines will return to untrained status.')) {
-      resetTrainingProgress(repertoire.id);
-      setTrainedLineIds(new Set());
-      const allIndices = repertoire.lines.map((_, i) => i).sort(() => Math.random() - 0.5);
-      setQueue(allIndices);
-      setCurrentLineIndex(allIndices[0] ?? 0);
-      setMoveIndex(0);
-      setLineHasMistake(false);
-      setShowMistakeUI(false);
-      setShowMoveRevealed(false);
-      setLineFinished(false);
-      setAllMastered(false);
-      setSolvedSuccessfully(false);
-      if (onUpdateRepertoire) onUpdateRepertoire();
-    }
+    setShowResetModal(true);
+  };
+
+  const confirmResetTraining = () => {
+    setShowResetModal(false);
+    resetTrainingProgress(repertoire.id);
+    setTrainedLineIds(new Set());
+    const allIndices = repertoire.lines.map((_, i) => i).sort(() => Math.random() - 0.5);
+    setQueue(allIndices);
+    setCurrentLineIndex(allIndices[0] ?? 0);
+    setMoveIndex(0);
+    setLineHasMistake(false);
+    setShowMistakeUI(false);
+    setShowMoveRevealed(false);
+    setLineFinished(false);
+    setAllMastered(false);
+    setSolvedSuccessfully(false);
+    if (onUpdateRepertoire) onUpdateRepertoire();
   };
 
   const totalTrainedCount = trainedLineIds.size;
@@ -478,6 +482,40 @@ export const TrainView: React.FC<TrainViewProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Reset Training Confirmation Modal */}
+      {showResetModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="bg-[#181d2a] border border-[#2e374e] rounded-2xl w-full max-w-sm p-6 shadow-2xl text-slate-100 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center space-x-3 text-[#e5a93c] mb-3">
+              <div className="w-10 h-10 rounded-xl bg-[#e5a93c]/15 flex items-center justify-center">
+                <RotateCcw className="w-5 h-5 text-[#e5a93c]" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white">Reset Training Progress?</h3>
+                <span className="text-xs text-slate-400">All lines return to untrained status</span>
+              </div>
+            </div>
+            <p className="text-xs text-slate-300 leading-relaxed mb-6">
+              Are you sure you want to reset all training progress for <strong className="text-white">"{repertoire.name}"</strong>? You can train each line again from the beginning.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowResetModal(false)}
+                className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white rounded-xl hover:bg-[#202737] transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmResetTraining}
+                className="px-5 py-2 text-xs font-bold text-slate-950 bg-[#e5a93c] hover:bg-[#f3b544] rounded-xl shadow-md transition"
+              >
+                Reset Training
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

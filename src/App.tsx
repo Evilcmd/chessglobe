@@ -59,12 +59,10 @@ export const App: React.FC = () => {
   };
 
   const handleRestoreDefaults = () => {
-    if (confirm('Restore the 4 default openings (Jobava London, 1d4, Sicilian Kan, King\'s Indian Defense)? This will reload all 4 full courses.')) {
-      const restored = restoreDefaultPresets();
-      setRepertoires(restored);
-      setSelectedRepId(null);
-      setCurrentView('dashboard');
-    }
+    const restored = restoreDefaultPresets();
+    setRepertoires(restored);
+    setSelectedRepId(null);
+    setCurrentView('dashboard');
   };
 
   return (

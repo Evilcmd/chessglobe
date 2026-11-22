@@ -32,6 +32,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onRestoreDefaults
 }) => {
   const [repertoireToDelete, setRepertoireToDelete] = useState<Repertoire | null>(null);
+  const [showRestoreModal, setShowRestoreModal] = useState(false);
 
   const whiteRepertoires = repertoires.filter(r => r.color === 'white');
   const blackRepertoires = repertoires.filter(r => r.color === 'black');
@@ -53,7 +54,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         {/* Right tools: Restore Defaults & New repertoire button */}
         <div className="flex items-center space-x-3.5">
           <button
-            onClick={onRestoreDefaults}
+            onClick={() => setShowRestoreModal(true)}
             title="Restore 4 Default Openings"
             className="flex items-center space-x-1.5 text-xs text-slate-400 hover:text-white bg-[#202737] hover:bg-[#283247] px-3 py-2 rounded-xl border border-[#2e374d] transition"
           >
@@ -179,6 +180,50 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 className="px-5 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-500 rounded-xl shadow-md transition"
               >
                 Delete Opening
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Restore Defaults Confirmation Modal */}
+      {showRestoreModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="bg-[#181d2a] border border-[#2e374e] rounded-2xl w-full max-w-md p-6 shadow-2xl text-slate-100 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center space-x-3 text-[#e5a93c] mb-3">
+              <div className="w-10 h-10 rounded-xl bg-[#e5a93c]/15 flex items-center justify-center">
+                <RotateCcw className="w-5 h-5 text-[#e5a93c]" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white">Restore Default Openings?</h3>
+                <span className="text-xs text-slate-400">Reloads the 4 preloaded repertoires</span>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-300 leading-relaxed mb-4">
+              This will reload the 4 full preset repertoires (<strong className="text-white">Jobava London System</strong>, <strong className="text-white">1. d4 Repertoire</strong>, <strong className="text-white">Sicilian Kan</strong>, and <strong className="text-white">King's Indian Defense</strong>) with their original lines, complete move commentary, and dedicated mascots.
+            </p>
+
+            <div className="bg-[#121622] border border-[#232b3e] rounded-xl p-3 mb-6 text-xs text-slate-400 flex items-start space-x-2.5">
+              <span className="text-[#e5a93c] text-sm leading-none mt-0.5">💡</span>
+              <span className="leading-relaxed">Any custom openings you created will be replaced by the default repertoire library.</span>
+            </div>
+
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowRestoreModal(false)}
+                className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white rounded-xl hover:bg-[#202737] transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowRestoreModal(false);
+                  onRestoreDefaults();
+                }}
+                className="px-5 py-2 text-xs font-bold text-slate-950 bg-[#e5a93c] hover:bg-[#f3b544] rounded-xl shadow-md transition"
+              >
+                Restore Openings
               </button>
             </div>
           </div>

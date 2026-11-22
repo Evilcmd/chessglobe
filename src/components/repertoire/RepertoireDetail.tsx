@@ -34,6 +34,8 @@ export const RepertoireDetail: React.FC<RepertoireDetailProps> = ({
 }) => {
   const [search, setSearch] = useState('');
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [showResetLearnModal, setShowResetLearnModal] = useState(false);
+  const [showResetTrainModal, setShowResetTrainModal] = useState(false);
 
   const totalLines = repertoire.lines.length;
   const learnedCount = repertoire.lines.filter(l => l.learned).length;
@@ -58,18 +60,16 @@ export const RepertoireDetail: React.FC<RepertoireDetailProps> = ({
     );
   });
 
-  const handleResetLearn = () => {
-    if (confirm('Are you sure you want to reset your Learning progress for this repertoire?')) {
-      resetLearningProgress(repertoire.id);
-      onReload();
-    }
+  const confirmResetLearn = () => {
+    resetLearningProgress(repertoire.id);
+    setShowResetLearnModal(false);
+    onReload();
   };
 
-  const handleResetTrain = () => {
-    if (confirm('Are you sure you want to reset your Training progress for this repertoire?')) {
-      resetTrainingProgress(repertoire.id);
-      onReload();
-    }
+  const confirmResetTrain = () => {
+    resetTrainingProgress(repertoire.id);
+    setShowResetTrainModal(false);
+    onReload();
   };
 
   return (
@@ -163,7 +163,7 @@ export const RepertoireDetail: React.FC<RepertoireDetailProps> = ({
               </button>
 
               <button
-                onClick={handleResetLearn}
+                onClick={() => setShowResetLearnModal(true)}
                 title="Reset Learning Progress"
                 className="flex items-center space-x-1 px-3 py-2.5 text-xs text-slate-400 hover:text-white bg-[#202737] hover:bg-[#283247] rounded-xl border border-[#2e374d] transition"
               >
@@ -216,7 +216,7 @@ export const RepertoireDetail: React.FC<RepertoireDetailProps> = ({
               </button>
 
               <button
-                onClick={handleResetTrain}
+                onClick={() => setShowResetTrainModal(true)}
                 title="Reset Training Progress"
                 className="flex items-center space-x-1 px-3 py-2.5 text-xs text-slate-400 hover:text-white bg-[#202737] hover:bg-[#283247] rounded-xl border border-[#2e374d] transition"
               >
@@ -350,6 +350,74 @@ export const RepertoireDetail: React.FC<RepertoireDetailProps> = ({
                 className="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-500 rounded-lg transition shadow-md"
               >
                 Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Learn Confirmation Modal */}
+      {showResetLearnModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-[#1b2130] border border-[#2e374d] rounded-2xl w-full max-w-sm p-6 shadow-2xl text-slate-100 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center space-x-3 text-emerald-400 mb-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/15 flex items-center justify-center">
+                <RotateCcw className="w-5 h-5 text-emerald-400" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white">Reset Learning Progress?</h3>
+                <span className="text-xs text-slate-400">All lines return to unlearned</span>
+              </div>
+            </div>
+            <p className="text-xs text-slate-300 leading-relaxed mb-6">
+              Are you sure you want to reset your learning progress for <strong className="text-white">"{repertoire.name}"</strong>? Your training progress will not be affected.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowResetLearnModal(false)}
+                className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white rounded-lg hover:bg-[#202737] transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmResetLearn}
+                className="px-4 py-2 text-xs font-bold text-slate-950 bg-emerald-500 hover:bg-emerald-400 rounded-lg transition shadow-md"
+              >
+                Reset Learning
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Train Confirmation Modal */}
+      {showResetTrainModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-[#1b2130] border border-[#2e374d] rounded-2xl w-full max-w-sm p-6 shadow-2xl text-slate-100 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center space-x-3 text-[#e5a93c] mb-3">
+              <div className="w-10 h-10 rounded-xl bg-[#e5a93c]/15 flex items-center justify-center">
+                <RotateCcw className="w-5 h-5 text-[#e5a93c]" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white">Reset Training Progress?</h3>
+                <span className="text-xs text-slate-400">All lines return to untrained</span>
+              </div>
+            </div>
+            <p className="text-xs text-slate-300 leading-relaxed mb-6">
+              Are you sure you want to reset your training stats and mastery for <strong className="text-white">"{repertoire.name}"</strong>? Your learned lines will stay learned.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowResetTrainModal(false)}
+                className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white rounded-lg hover:bg-[#202737] transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmResetTrain}
+                className="px-4 py-2 text-xs font-bold text-slate-950 bg-[#e5a93c] hover:bg-[#f3b544] rounded-lg transition shadow-md"
+              >
+                Reset Training
               </button>
             </div>
           </div>
