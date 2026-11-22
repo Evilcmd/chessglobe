@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Mascot 5: Grandmaster Wizard (Star Wizard Hat, Wand & Sparks) -->
+  <ellipse cx="50" cy="94" rx="26" ry="5" fill="#0c1017" opacity="0.35"/>
+  <!-- Feet -->
+  <path d="M40 88 C40 92 36 94 33 94 C30 94 32 89 36 86 Z" fill="#f59e0b"/>
+  <path d="M60 88 C60 92 64 94 67 94 C70 94 68 89 64 86 Z" fill="#f59e0b"/>
+  <!-- Bird Body -->
+  <ellipse cx="50" cy="56" rx="34" ry="36" fill="#3b5998"/>
+  <path d="M50 20 C28 20 20 38 20 60 C20 78 32 90 50 90 C68 90 80 78 80 60 C80 38 72 20 50 20 Z" fill="#4a69ad"/>
+  <!-- Belly -->
+  <ellipse cx="50" cy="65" rx="22" ry="20" fill="#e2e8f0"/>
+  <!-- Eyes -->
+  <circle cx="38" cy="44" r="8.5" fill="#ffffff"/>
+  <circle cx="62" cy="44" r="8.5" fill="#ffffff"/>
+  <circle cx="39" cy="45" r="5" fill="#1e293b"/>
+  <circle cx="61" cy="45" r="5" fill="#1e293b"/>
+  <circle cx="37" cy="43" r="2" fill="#ffffff"/>
+  <circle cx="59" cy="43" r="2" fill="#ffffff"/>
+  <!-- Beak -->
+  <path d="M45 50 C45 50 50 47 55 50 C55 50 51 58 50 58 C49 58 45 50 45 50 Z" fill="#f59e0b"/>
+  <path d="M46 50 L54 50" stroke="#d97706" stroke-width="1.2" stroke-linecap="round"/>
+  <!-- Cheeks Blush -->
+  <circle cx="28" cy="51" r="4.5" fill="#f472b6" opacity="0.45"/>
+  <circle cx="72" cy="51" r="4.5" fill="#f472b6" opacity="0.45"/>
+  <!-- Pointy Wizard Hat with Stars -->
+  <path d="M18 28 C28 25 72 25 82 28 C74 24 66 22 50 22 C34 22 26 24 18 28 Z" fill="#6366f1" stroke="#4338ca" stroke-width="1.2"/>
+  <path d="M26 25 L50 2 C52 1 54 2 55 4 L64 12 C60 12 56 15 54 18 L74 25 Z" fill="#4f46e5" stroke="#3730a3" stroke-width="1.2"/>
+  <path d="M50 2 C54 -3 62 -2 60 4 L55 4 Z" fill="#4338ca"/>
+  <!-- Gold Stars on Hat -->
+  <path d="M44 14 L45 12 L47 11.5 L45 11 L44 9 L43 11 L41 11.5 L43 12 Z" fill="#fbbf24"/>
+  <path d="M55 19 L56 17 L58 16.5 L56 16 L55 14 L54 16 L52 16.5 L54 17 Z" fill="#fbbf24"/>
+  <!-- Wizard Magic Wand in right wing -->
+  <g transform="translate(68, 48)">
+    <line x1="2" y1="28" x2="16" y2="6" stroke="#92400e" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="17" cy="5" r="4.5" fill="#38bdf8" stroke="#0284c7" stroke-width="1"/>
+    <!-- Magical Sparkles -->
+    <path d="M17 0 L18 3 L21 4 L18 5 L17 8 L16 5 L13 4 L16 3 Z" fill="#fde047"/>
+    <circle cx="23" cy="1" r="1.2" fill="#38bdf8"/>
+    <circle cx="11" cy="9" r="1" fill="#f472b6"/>
+  </g>
+</svg>

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Mascot 4: Royal King (King's Crown, Ermine Royal Cape & Scepter) -->
+  <ellipse cx="50" cy="94" rx="26" ry="5" fill="#0c1017" opacity="0.35"/>
+  <!-- Feet -->
+  <path d="M40 88 C40 92 36 94 33 94 C30 94 32 89 36 86 Z" fill="#f59e0b"/>
+  <path d="M60 88 C60 92 64 94 67 94 C70 94 68 89 64 86 Z" fill="#f59e0b"/>
+  <!-- Bird Body -->
+  <ellipse cx="50" cy="56" rx="34" ry="36" fill="#3b5998"/>
+  <path d="M50 20 C28 20 20 38 20 60 C20 78 32 90 50 90 C68 90 80 78 80 60 C80 38 72 20 50 20 Z" fill="#4a69ad"/>
+  <!-- Belly -->
+  <ellipse cx="50" cy="65" rx="22" ry="20" fill="#e2e8f0"/>
+  <!-- Eyes -->
+  <circle cx="38" cy="44" r="8.5" fill="#ffffff"/>
+  <circle cx="62" cy="44" r="8.5" fill="#ffffff"/>
+  <circle cx="39" cy="45" r="5" fill="#1e293b"/>
+  <circle cx="61" cy="45" r="5" fill="#1e293b"/>
+  <circle cx="37" cy="43" r="2" fill="#ffffff"/>
+  <circle cx="59" cy="43" r="2" fill="#ffffff"/>
+  <!-- Beak -->
+  <path d="M45 50 C45 50 50 47 55 50 C55 50 51 58 50 58 C49 58 45 50 45 50 Z" fill="#f59e0b"/>
+  <path d="M46 50 L54 50" stroke="#d97706" stroke-width="1.2" stroke-linecap="round"/>
+  <!-- Cheeks Blush -->
+  <circle cx="28" cy="51" r="4.5" fill="#f472b6" opacity="0.45"/>
+  <circle cx="72" cy="51" r="4.5" fill="#f472b6" opacity="0.45"/>
+  <!-- Royal Crown -->
+  <path d="M30 24 L34 10 L42 16 L50 6 L58 16 L66 10 L70 24 Z" fill="#f59e0b" stroke="#d97706" stroke-width="1.5"/>
+  <!-- Crown Jewels -->
+  <circle cx="50" cy="5" r="2" fill="#ef4444"/>
+  <circle cx="34" cy="9.5" r="1.5" fill="#3b82f6"/>
+  <circle cx="66" cy="9.5" r="1.5" fill="#3b82f6"/>
+  <circle cx="50" cy="18" r="2" fill="#ef4444"/>
+  <circle cx="40" cy="19" r="1.5" fill="#10b981"/>
+  <circle cx="60" cy="19" r="1.5" fill="#10b981"/>
+  <rect x="29" y="21" width="42" height="4" rx="2" fill="#d97706"/>
+  <!-- Royal Mantle Cape -->
+  <path d="M22 62 C26 56 36 54 50 54 C64 54 74 56 78 62 C82 72 80 84 76 88 C70 85 64 82 50 82 C36 82 30 85 24 88 C20 84 18 72 22 62 Z" fill="#b91c1c" stroke="#991b1b" stroke-width="1.2"/>
+  <!-- Ermine Fur Collar (White with black specks) -->
+  <path d="M22 60 C26 56 38 54 50 54 C62 54 74 56 78 60 C78 65 72 68 64 68 C58 68 54 66 50 66 C46 66 42 68 36 68 C28 68 22 65 22 60 Z" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1"/>
+  <circle cx="34" cy="62" r="1" fill="#0f172a"/>
+  <circle cx="44" cy="61" r="1" fill="#0f172a"/>
+  <circle cx="56" cy="61" r="1" fill="#0f172a"/>
+  <circle cx="66" cy="62" r="1" fill="#0f172a"/>
+  <!-- Golden King Scepter -->
+  <g transform="translate(73, 52)">
+    <line x1="3" y1="2" x2="11" y2="30" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="2" cy="1" r="4.5" fill="#f59e0b" stroke="#d97706" stroke-width="1"/>
+    <!-- Cross on top of scepter -->
+    <line x1="2" y1="-5" x2="2" y2="-1" stroke="#ef4444" stroke-width="1.8"/>
+    <line x1="0" y1="-3" x2="4" y2="-3" stroke="#ef4444" stroke-width="1.8"/>
+  </g>
+</svg>

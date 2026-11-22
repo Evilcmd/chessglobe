@@ -147,6 +147,7 @@ export const App: React.FC = () => {
         <NewRepertoireModal
           onClose={() => setIsNewModalOpen(false)}
           onCreate={handleCreateRepertoire}
+          defaultMascotIndex={repertoires.length % 10}
         />
       )}
     </div>

@@ -26,6 +26,7 @@ export interface Repertoire {
   color: 'white' | 'black';
   pgn: string;
   coverId?: string; // mascot avatar style
+  mascotIndex?: number;
   lines: RepertoireLine[];
   createdAt: number;
   archived?: boolean;

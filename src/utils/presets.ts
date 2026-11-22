@@ -22,6 +22,7 @@ export function getInitialPresets(): Repertoire[] {
       color: 'white',
       pgn: JOBAVA_LONDON_PGN,
       coverId: 'jobava',
+      mascotIndex: 0,
       lines: jobavaLines,
       createdAt: Date.now() - 86400000 * 3
     },
@@ -31,6 +32,7 @@ export function getInitialPresets(): Repertoire[] {
       color: 'white',
       pgn: D4_REPERTOIRE_PGN,
       coverId: '1d4',
+      mascotIndex: 1,
       lines: d4Lines,
       createdAt: Date.now() - 86400000 * 2
     },
@@ -40,6 +42,7 @@ export function getInitialPresets(): Repertoire[] {
       color: 'black',
       pgn: SICILIAN_KAN_PGN,
       coverId: 'kan',
+      mascotIndex: 2,
       lines: kanLines,
       createdAt: Date.now() - 86400000 * 1
     },
@@ -49,6 +52,7 @@ export function getInitialPresets(): Repertoire[] {
       color: 'black',
       pgn: KINGS_INDIAN_PGN,
       coverId: 'kid',
+      mascotIndex: 3,
       lines: kidLines,
       createdAt: Date.now()
     }

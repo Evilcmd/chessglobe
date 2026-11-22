@@ -15,7 +15,19 @@ export function loadRepertoires(): Repertoire[] {
     }
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed) && parsed.length > 0) {
-      return parsed;
+      // Ensure all repertoires have mascotIndex assigned round-robin
+      let modified = false;
+      const updated = parsed.map((rep: Repertoire, idx: number) => {
+        if (typeof rep.mascotIndex !== 'number') {
+          modified = true;
+          return { ...rep, mascotIndex: idx % 10 };
+        }
+        return rep;
+      });
+      if (modified) {
+        saveRepertoires(updated);
+      }
+      return updated;
     }
     const presets = getInitialPresets();
     saveRepertoires(presets);
@@ -48,9 +60,12 @@ export function getRepertoireById(id: string): Repertoire | undefined {
 
 export function createRepertoire(item: Omit<Repertoire, 'id' | 'createdAt'>): Repertoire {
   const all = loadRepertoires();
+  // Round-robin mascot index based on current total openings count
+  const mascotIndex = item.mascotIndex ?? (all.length % 10);
   const newRep: Repertoire = {
     ...item,
     id: `rep-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+    mascotIndex,
     createdAt: Date.now()
   };
   all.unshift(newRep);

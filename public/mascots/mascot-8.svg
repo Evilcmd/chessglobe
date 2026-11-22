@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Mascot 8: Viking Berserker (Nordic Winged Helmet & Chess Shield) -->
+  <ellipse cx="50" cy="94" rx="26" ry="5" fill="#0c1017" opacity="0.35"/>
+  <!-- Feet -->
+  <path d="M40 88 C40 92 36 94 33 94 C30 94 32 89 36 86 Z" fill="#f59e0b"/>
+  <path d="M60 88 C60 92 64 94 67 94 C70 94 68 89 64 86 Z" fill="#f59e0b"/>
+  <!-- Bird Body -->
+  <ellipse cx="50" cy="56" rx="34" ry="36" fill="#1e3a8a"/>
+  <path d="M50 20 C28 20 20 38 20 60 C20 78 32 90 50 90 C68 90 80 78 80 60 C80 38 72 20 50 20 Z" fill="#1d4ed8"/>
+  <!-- Belly -->
+  <ellipse cx="50" cy="65" rx="22" ry="20" fill="#e2e8f0"/>
+  <!-- Eyes -->
+  <circle cx="38" cy="44" r="8.5" fill="#ffffff"/>
+  <circle cx="62" cy="44" r="8.5" fill="#ffffff"/>
+  <circle cx="39" cy="45" r="5" fill="#0f172a"/>
+  <circle cx="61" cy="45" r="5" fill="#0f172a"/>
+  <circle cx="37" cy="43" r="2" fill="#ffffff"/>
+  <circle cx="59" cy="43" r="2" fill="#ffffff"/>
+  <!-- Beak -->
+  <path d="M45 50 C45 50 50 47 55 50 C55 50 51 58 50 58 C49 58 45 50 45 50 Z" fill="#f59e0b"/>
+  <path d="M46 50 L54 50" stroke="#d97706" stroke-width="1.2" stroke-linecap="round"/>
+  <!-- Cheeks Blush -->
+  <circle cx="28" cy="51" r="4.5" fill="#f472b6" opacity="0.45"/>
+  <circle cx="72" cy="51" r="4.5" fill="#f472b6" opacity="0.45"/>
+  <!-- Iron Viking Cap -->
+  <path d="M28 28 C28 12 38 8 50 8 C62 8 72 12 72 28 C64 29 36 29 28 28 Z" fill="#94a3b8" stroke="#475569" stroke-width="1.2"/>
+  <rect x="27" y="26" width="46" height="5" rx="1.5" fill="#64748b"/>
+  <circle cx="50" cy="28.5" r="2" fill="#f59e0b"/>
+  <!-- Viking Horns / Wings -->
+  <!-- Left Horn -->
+  <path d="M30 24 C22 20 12 10 10 2 C16 4 24 14 27 20 Z" fill="#fef3c7" stroke="#d97706" stroke-width="1.2"/>
+  <!-- Right Horn -->
+  <path d="M70 24 C78 20 88 10 90 2 C84 4 76 14 73 20 Z" fill="#fef3c7" stroke="#d97706" stroke-width="1.2"/>
+  <!-- Round Viking Wooden Chess Shield in Wing -->
+  <g transform="translate(10, 52)">
+    <circle cx="12" cy="12" r="12" fill="#b45309" stroke="#78350f" stroke-width="1.5"/>
+    <circle cx="12" cy="12" r="9.5" fill="#d97706"/>
+    <!-- Iron rim and boss -->
+    <circle cx="12" cy="12" r="4.5" fill="#94a3b8" stroke="#475569" stroke-width="1"/>
+    <!-- Painted Cross Pattern -->
+    <line x1="12" y1="2" x2="12" y2="22" stroke="#451a03" stroke-width="1.5"/>
+    <line x1="2" y1="12" x2="22" y2="12" stroke="#451a03" stroke-width="1.5"/>
+  </g>
+</svg>

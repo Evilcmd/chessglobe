@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Mascot 9: Detective Sherlock (Deerstalker Hat, Bow Tie & Magnifying Glass) -->
+  <ellipse cx="50" cy="94" rx="26" ry="5" fill="#0c1017" opacity="0.35"/>
+  <!-- Feet -->
+  <path d="M40 88 C40 92 36 94 33 94 C30 94 32 89 36 86 Z" fill="#f59e0b"/>
+  <path d="M60 88 C60 92 64 94 67 94 C70 94 68 89 64 86 Z" fill="#f59e0b"/>
+  <!-- Bird Body -->
+  <ellipse cx="50" cy="56" rx="34" ry="36" fill="#3b5998"/>
+  <path d="M50 20 C28 20 20 38 20 60 C20 78 32 90 50 90 C68 90 80 78 80 60 C80 38 72 20 50 20 Z" fill="#4a69ad"/>
+  <!-- Belly -->
+  <ellipse cx="50" cy="65" rx="22" ry="20" fill="#e2e8f0"/>
+  <!-- Eyes -->
+  <circle cx="38" cy="44" r="8.5" fill="#ffffff"/>
+  <circle cx="62" cy="44" r="8.5" fill="#ffffff"/>
+  <circle cx="39" cy="45" r="5" fill="#1e293b"/>
+  <circle cx="61" cy="45" r="5" fill="#1e293b"/>
+  <circle cx="37" cy="43" r="2" fill="#ffffff"/>
+  <circle cx="59" cy="43" r="2" fill="#ffffff"/>
+  <!-- Beak -->
+  <path d="M45 50 C45 50 50 47 55 50 C55 50 51 58 50 58 C49 58 45 50 45 50 Z" fill="#f59e0b"/>
+  <path d="M46 50 L54 50" stroke="#d97706" stroke-width="1.2" stroke-linecap="round"/>
+  <!-- Cheeks Blush -->
+  <circle cx="28" cy="51" r="4.5" fill="#f472b6" opacity="0.45"/>
+  <circle cx="72" cy="51" r="4.5" fill="#f472b6" opacity="0.45"/>
+  <!-- Deerstalker Detective Hat (Brown tweed) -->
+  <path d="M26 26 C26 10 36 6 50 6 C64 6 74 10 74 26 Z" fill="#78350f" stroke="#451a03" stroke-width="1.2"/>
+  <!-- Front and Back Visors -->
+  <path d="M22 26 C22 22 26 24 30 26 C26 28 22 28 22 26 Z" fill="#92400e"/>
+  <path d="M70 26 C74 24 78 22 78 26 C78 28 74 28 70 26 Z" fill="#92400e"/>
+  <rect x="25" y="24" width="50" height="4" rx="1.5" fill="#92400e" stroke="#451a03" stroke-width="0.8"/>
+  <!-- Ear Flap tied up with ribbon -->
+  <path d="M44 8 C48 6 52 6 56 8 L54 18 L46 18 Z" fill="#92400e"/>
+  <circle cx="50" cy="8" r="2" fill="#ef4444"/>
+  <!-- Brown Bow Tie on Collar -->
+  <polygon points="44,60 56,60 50,63" fill="#b91c1c"/>
+  <polygon points="44,66 56,66 50,63" fill="#b91c1c"/>
+  <circle cx="50" cy="63" r="1.8" fill="#991b1b"/>
+  <!-- Magnifying Glass inspecting a square -->
+  <g transform="translate(68, 48)">
+    <line x1="8" y1="18" x2="18" y2="28" stroke="#92400e" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="8" cy="12" r="9" fill="#e0f2fe" opacity="0.85" stroke="#f59e0b" stroke-width="2"/>
+    <circle cx="8" cy="12" r="6" stroke="#0284c7" stroke-width="0.8" opacity="0.5" fill="none"/>
+  </g>
+</svg>

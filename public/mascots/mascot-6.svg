@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Mascot 6: Blitz Ninja (Tactical Ninja Headband & Shuriken Token) -->
+  <ellipse cx="50" cy="94" rx="26" ry="5" fill="#0c1017" opacity="0.35"/>
+  <!-- Feet -->
+  <path d="M40 88 C40 92 36 94 33 94 C30 94 32 89 36 86 Z" fill="#f59e0b"/>
+  <path d="M60 88 C60 92 64 94 67 94 C70 94 68 89 64 86 Z" fill="#f59e0b"/>
+  <!-- Bird Body -->
+  <ellipse cx="50" cy="56" rx="34" ry="36" fill="#1e293b"/>
+  <path d="M50 20 C28 20 20 38 20 60 C20 78 32 90 50 90 C68 90 80 78 80 60 C80 38 72 20 50 20 Z" fill="#334155"/>
+  <!-- Belly -->
+  <ellipse cx="50" cy="67" rx="20" ry="18" fill="#64748b"/>
+  <!-- Ninja Black Face Mask -->
+  <path d="M26 48 C32 44 68 44 74 48 C76 60 70 70 50 72 C30 70 24 60 26 48 Z" fill="#0f172a" stroke="#1e293b" stroke-width="1.2"/>
+  <!-- Determined Eyes -->
+  <circle cx="38" cy="40" r="7.5" fill="#ffffff"/>
+  <circle cx="62" cy="40" r="7.5" fill="#ffffff"/>
+  <circle cx="40" cy="40" r="4.5" fill="#0f172a"/>
+  <circle cx="60" cy="40" r="4.5" fill="#0f172a"/>
+  <circle cx="38" cy="38" r="1.8" fill="#ffffff"/>
+  <circle cx="58" cy="38" r="1.8" fill="#ffffff"/>
+  <!-- Eyebrow Angle (fierce tactical look) -->
+  <path d="M32 32 L44 35" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M68 32 L56 35" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Beak peeking over mask -->
+  <path d="M46 45 C46 45 50 43 54 45 C54 45 51 51 50 51 C49 51 46 45 46 45 Z" fill="#f59e0b"/>
+  <!-- Red Ninja Headband -->
+  <path d="M23 26 C33 24 67 24 77 26 L76 34 C66 32 34 32 24 34 Z" fill="#ef4444" stroke="#dc2626" stroke-width="1"/>
+  <!-- Headband Knot & Flying Tails -->
+  <circle cx="77" cy="28" r="3.5" fill="#dc2626"/>
+  <path d="M78 28 C86 25 92 18 96 14 C94 20 90 28 80 32 Z" fill="#ef4444"/>
+  <path d="M78 30 C86 31 93 28 98 25 C94 30 88 36 78 35 Z" fill="#dc2626"/>
+  <!-- Silver Chess Star Badge on Headband -->
+  <circle cx="50" cy="29" r="3" fill="#e2e8f0" stroke="#94a3b8" stroke-width="0.8"/>
+  <path d="M50 27 L51 31 M48 29 L52 29" stroke="#0f172a" stroke-width="1"/>
+</svg>

@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Mascot 1: London Explorer (Yellow Scarf & Bell) -->
+  <ellipse cx="50" cy="94" rx="26" ry="5" fill="#0c1017" opacity="0.35"/>
+  <!-- Feet -->
+  <path d="M40 88 C40 92 36 94 33 94 C30 94 32 89 36 86 Z" fill="#f59e0b"/>
+  <path d="M60 88 C60 92 64 94 67 94 C70 94 68 89 64 86 Z" fill="#f59e0b"/>
+  <path d="M42 88 C42 93 40 95 38 95" stroke="#d97706" stroke-width="2" stroke-linecap="round"/>
+  <path d="M58 88 C58 93 60 95 62 95" stroke="#d97706" stroke-width="2" stroke-linecap="round"/>
+  <!-- Bird Body -->
+  <ellipse cx="50" cy="56" rx="34" ry="36" fill="#3b5998"/>
+  <path d="M50 20 C28 20 20 38 20 60 C20 78 32 90 50 90 C68 90 80 78 80 60 C80 38 72 20 50 20 Z" fill="#4a69ad"/>
+  <!-- Feather Tuft -->
+  <path d="M48 20 C46 14 42 11 39 12 C44 14 46 18 47 21 Z" fill="#3b5998"/>
+  <path d="M51 20 C52 13 56 10 59 11 C55 14 53 18 52 21 Z" fill="#3b5998"/>
+  <!-- Belly -->
+  <ellipse cx="50" cy="65" rx="22" ry="20" fill="#e2e8f0"/>
+  <!-- Eyes -->
+  <circle cx="38" cy="42" r="8.5" fill="#ffffff"/>
+  <circle cx="62" cy="42" r="8.5" fill="#ffffff"/>
+  <circle cx="39" cy="43" r="5" fill="#1e293b"/>
+  <circle cx="61" cy="43" r="5" fill="#1e293b"/>
+  <circle cx="37" cy="41" r="2" fill="#ffffff"/>
+  <circle cx="59" cy="41" r="2" fill="#ffffff"/>
+  <!-- Beak -->
+  <path d="M45 48 C45 48 50 45 55 48 C55 48 51 56 50 56 C49 56 45 48 45 48 Z" fill="#f59e0b"/>
+  <path d="M46 48 L54 48" stroke="#d97706" stroke-width="1.2" stroke-linecap="round"/>
+  <!-- Cheeks Blush -->
+  <circle cx="28" cy="49" r="4.5" fill="#f472b6" opacity="0.45"/>
+  <circle cx="72" cy="49" r="4.5" fill="#f472b6" opacity="0.45"/>
+  <!-- Yellow Knit Scarf -->
+  <path d="M22 60 C26 56 38 54 50 54 C62 54 74 56 78 60 C80 64 76 68 70 68 C58 68 42 68 30 68 C24 68 20 64 22 60 Z" fill="#eab308"/>
+  <path d="M54 62 L62 82 C62 84 57 85 55 83 L49 64 Z" fill="#ca8a04"/>
+  <path d="M53 62 L60 80 C60 82 56 83 54 81 L48 64 Z" fill="#eab308"/>
+  <path d="M32 58 L32 66 M40 56 L40 67 M48 56 L48 67 M56 56 L56 67 M64 58 L64 66" stroke="#ca8a04" stroke-width="2" stroke-linecap="round"/>
+  <!-- Brass Bell in Wing -->
+  <g transform="translate(14, 66)">
+    <path d="M6 2 C3 2 1 6 1 10 L11 10 C11 6 9 2 6 2 Z" fill="#f59e0b" stroke="#d97706" stroke-width="1"/>
+    <circle cx="6" cy="11.5" r="1.8" fill="#ca8a04"/>
+    <circle cx="6" cy="1" r="1.2" fill="#d97706"/>
+  </g>
+</svg>

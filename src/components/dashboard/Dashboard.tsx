@@ -10,6 +10,7 @@ import {
   RotateCcw
 } from 'lucide-react';
 import { Repertoire } from '../../types';
+import { getRepertoireMascot } from '../../utils/mascot';
 
 interface DashboardProps {
   repertoires: Repertoire[];
@@ -223,7 +224,7 @@ const RepertoireCard: React.FC<{
         {/* Left: Mascot Cover Artwork Thumbnail */}
         <div className="flex items-start space-x-3.5 flex-1 min-w-0">
           <div className="w-16 h-16 rounded-xl bg-[#232a3c] border border-[#2e374e] p-1.5 flex items-center justify-center flex-shrink-0 shadow-inner group-hover:scale-105 transition-transform">
-            <img src="/mascot.svg" alt="Cover" className="w-full h-full object-contain" />
+            <img src={getRepertoireMascot(repertoire)} alt={repertoire.name} className="w-full h-full object-contain" />
           </div>
 
           <div className="flex-1 min-w-0">

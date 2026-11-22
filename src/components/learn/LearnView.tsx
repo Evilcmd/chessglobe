@@ -21,6 +21,7 @@ import { LinesListModal } from '../lines/LinesListModal';
 import { engineService, EngineEvaluation } from '../../utils/stockfishService';
 import { sound } from '../../utils/sound';
 import { updateLineStatus } from '../../utils/storage';
+import { getRepertoireMascot } from '../../utils/mascot';
 
 interface LearnViewProps {
   repertoire: Repertoire;
@@ -391,7 +392,7 @@ export const LearnView: React.FC<LearnViewProps> = ({
               {/* Mascot Bird Avatar (matches Image 3: standalone mascot standing beside bubble) */}
               <div className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0 flex items-center justify-center filter drop-shadow-lg mt-0.5">
                 <img
-                  src="/mascot.svg"
+                  src={getRepertoireMascot(repertoire)}
                   alt="ChessAtlas Mascot"
                   className="w-full h-full object-contain"
                 />

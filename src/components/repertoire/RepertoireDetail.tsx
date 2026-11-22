@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Repertoire } from '../../types';
 import { resetLearningProgress, resetTrainingProgress } from '../../utils/storage';
+import { getRepertoireMascot } from '../../utils/mascot';
 
 interface RepertoireDetailProps {
   repertoire: Repertoire;
@@ -85,16 +86,23 @@ export const RepertoireDetail: React.FC<RepertoireDetailProps> = ({
           </button>
 
           <div className="flex items-center space-x-3">
-            <h1 className="text-xl font-bold text-white">{repertoire.name}</h1>
-            <span
-              className={`text-xs font-bold uppercase px-2.5 py-0.5 rounded-full ${
-                repertoire.color === 'white'
-                  ? 'bg-slate-200 text-slate-900'
-                  : 'bg-[#293246] text-slate-200 border border-[#3e4a64]'
-              }`}
-            >
-              {repertoire.color} Repertoire
-            </span>
+            <div className="w-10 h-10 rounded-xl bg-[#232a3c] border border-[#2e374e] p-1 flex items-center justify-center flex-shrink-0 shadow-sm">
+              <img src={getRepertoireMascot(repertoire)} alt={repertoire.name} className="w-full h-full object-contain" />
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <h1 className="text-xl font-bold text-white leading-tight">{repertoire.name}</h1>
+                <span
+                  className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
+                    repertoire.color === 'white'
+                      ? 'bg-slate-200 text-slate-900'
+                      : 'bg-[#293246] text-slate-200 border border-[#3e4a64]'
+                  }`}
+                >
+                  {repertoire.color}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 

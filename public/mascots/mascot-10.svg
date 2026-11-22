@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Mascot 10: Cosmic Astronaut (Space Helmet & Stars) -->
+  <ellipse cx="50" cy="94" rx="26" ry="5" fill="#0c1017" opacity="0.35"/>
+  <!-- Feet -->
+  <path d="M40 88 C40 92 36 94 33 94 C30 94 32 89 36 86 Z" fill="#f59e0b"/>
+  <path d="M60 88 C60 92 64 94 67 94 C70 94 68 89 64 86 Z" fill="#f59e0b"/>
+  <!-- Bird Body in White Spacesuit -->
+  <ellipse cx="50" cy="56" rx="34" ry="36" fill="#0284c7"/>
+  <path d="M50 20 C28 20 20 38 20 60 C20 78 32 90 50 90 C68 90 80 78 80 60 C80 38 72 20 50 20 Z" fill="#38bdf8"/>
+  <!-- White Astronaut Suit Belly -->
+  <ellipse cx="50" cy="65" rx="22" ry="20" fill="#f8fafc"/>
+  <!-- Suit Chest Control Panel -->
+  <rect x="42" y="66" width="16" height="8" rx="2" fill="#0f172a"/>
+  <circle cx="46" cy="70" r="1.5" fill="#ef4444"/>
+  <circle cx="50" cy="70" r="1.5" fill="#22c55e"/>
+  <circle cx="54" cy="70" r="1.5" fill="#3b82f6"/>
+  <!-- Glass Space Helmet Dome -->
+  <circle cx="50" cy="46" r="30" fill="#38bdf8" fill-opacity="0.12" stroke="#e2e8f0" stroke-width="2.5"/>
+  <!-- Helmet Collar Ring -->
+  <ellipse cx="50" cy="72" rx="24" ry="5" fill="#cbd5e1" stroke="#94a3b8" stroke-width="1.5"/>
+  <!-- Eyes -->
+  <circle cx="38" cy="44" r="8" fill="#ffffff"/>
+  <circle cx="62" cy="44" r="8" fill="#ffffff"/>
+  <circle cx="39" cy="45" r="5" fill="#0f172a"/>
+  <circle cx="61" cy="45" r="5" fill="#0f172a"/>
+  <circle cx="37" cy="43" r="2" fill="#ffffff"/>
+  <circle cx="59" cy="43" r="2" fill="#ffffff"/>
+  <!-- Beak -->
+  <path d="M45 50 C45 50 50 47 55 50 C55 50 51 58 50 58 C49 58 45 50 45 50 Z" fill="#f59e0b"/>
+  <path d="M46 50 L54 50" stroke="#d97706" stroke-width="1.2" stroke-linecap="round"/>
+  <!-- Cheeks Blush -->
+  <circle cx="28" cy="51" r="4.5" fill="#f472b6" opacity="0.45"/>
+  <circle cx="72" cy="51" r="4.5" fill="#f472b6" opacity="0.45"/>
+  <!-- Curved Helmet Glass Glare Highlight -->
+  <path d="M28 32 C34 24 44 20 54 20" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
+  <circle cx="60" cy="22" r="1.5" fill="#ffffff" opacity="0.8"/>
+  <!-- Little Antenna on top of helmet -->
+  <line x1="50" y1="16" x2="50" y2="8" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="50" cy="7" r="2.5" fill="#ef4444"/>
+  <!-- Orbital Stars -->
+  <circle cx="16" cy="24" r="1.5" fill="#fef08a"/>
+  <circle cx="84" cy="28" r="1.2" fill="#fef08a"/>
+</svg>

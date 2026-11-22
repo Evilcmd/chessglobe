@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { X, Upload, Sparkles, FileText, CheckCircle, AlertCircle } from 'lucide-react';
 import { parsePgnToLines } from '../../utils/pgnParser';
 import { Repertoire } from '../../types';
+import { MASCOTS } from '../../utils/mascot';
 import {
   JOBAVA_LONDON_PGN,
   D4_REPERTOIRE_PGN,
@@ -12,6 +13,7 @@ import {
 interface NewRepertoireModalProps {
   onClose: () => void;
   onCreate: (rep: Omit<Repertoire, 'id' | 'createdAt'>) => void;
+  defaultMascotIndex?: number;
 }
 
 const PRESET_OPENINGS = [
@@ -43,10 +45,12 @@ const PRESET_OPENINGS = [
 
 export const NewRepertoireModal: React.FC<NewRepertoireModalProps> = ({
   onClose,
-  onCreate
+  onCreate,
+  defaultMascotIndex = 0
 }) => {
   const [name, setName] = useState('');
   const [color, setColor] = useState<'white' | 'black'>('white');
+  const [selectedMascotIndex, setSelectedMascotIndex] = useState<number>(defaultMascotIndex % 10);
   const [activeTab, setActiveTab] = useState<'paste' | 'preset' | 'file'>('paste');
   const [pgnText, setPgnText] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -107,6 +111,7 @@ export const NewRepertoireModal: React.FC<NewRepertoireModalProps> = ({
       name: name.trim(),
       color,
       pgn: pgnText.trim(),
+      mascotIndex: selectedMascotIndex,
       lines
     });
   };
@@ -195,6 +200,38 @@ export const NewRepertoireModal: React.FC<NewRepertoireModalProps> = ({
                 <span>Black repertoire</span>
               </button>
             </div>
+          </div>
+
+          {/* Opening Mascot Selection (10 round-robin mascots) */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs font-semibold text-slate-300">
+                Opening Mascot
+              </label>
+              <span className="text-[11px] text-[#e5a93c] font-medium">
+                #{selectedMascotIndex + 1}: {MASCOTS[selectedMascotIndex].name}
+              </span>
+            </div>
+            <div className="grid grid-cols-5 sm:grid-cols-10 gap-1.5 p-2 bg-[#141824] border border-[#2a3449] rounded-xl">
+              {MASCOTS.map((m, idx) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => setSelectedMascotIndex(idx)}
+                  title={`${m.name} (${m.title})`}
+                  className={`p-1 rounded-lg border transition flex flex-col items-center cursor-pointer ${
+                    selectedMascotIndex === idx
+                      ? 'bg-[#e5a93c]/20 border-[#e5a93c] ring-1 ring-[#e5a93c]'
+                      : 'bg-[#1b2233] border-[#293347] hover:border-slate-400 opacity-70 hover:opacity-100'
+                  }`}
+                >
+                  <img src={m.src} alt={m.name} className="w-7 h-7 object-contain pointer-events-none" />
+                </button>
+              ))}
+            </div>
+            <p className="text-[10px] text-slate-500 mt-1">
+              Auto-assigned in round-robin sequence (circles back every 10 openings). Click any mascot to customize.
+            </p>
           </div>
 
           {/* PGN Tabs (Paste / Presets / File) */}

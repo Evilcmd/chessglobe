@@ -17,6 +17,7 @@ import { ChessBoard, ArrowData } from '../chess/ChessBoard';
 import { FlipBoardIcon } from '../icons/FlipBoardIcon';
 import { sound } from '../../utils/sound';
 import { updateLineStatus, resetTrainingProgress } from '../../utils/storage';
+import { getRepertoireMascot } from '../../utils/mascot';
 
 interface TrainViewProps {
   repertoire: Repertoire;
@@ -434,7 +435,7 @@ export const TrainView: React.FC<TrainViewProps> = ({
               <div className="flex flex-col items-center space-y-3 p-4">
                 <div className="w-12 h-12 rounded-full bg-[#1b2131] border border-[#2b354b] p-1.5 flex items-center justify-center shadow-md">
                   <img
-                    src="/mascot.svg"
+                    src={getRepertoireMascot(repertoire)}
                     alt="ChessAtlas Mascot"
                     className="w-full h-full object-contain"
                   />

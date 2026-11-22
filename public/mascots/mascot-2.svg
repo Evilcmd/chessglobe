@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Mascot 2: Knight Champion (Silver Knight Helmet & Crest) -->
+  <ellipse cx="50" cy="94" rx="26" ry="5" fill="#0c1017" opacity="0.35"/>
+  <!-- Feet -->
+  <path d="M40 88 C40 92 36 94 33 94 C30 94 32 89 36 86 Z" fill="#f59e0b"/>
+  <path d="M60 88 C60 92 64 94 67 94 C70 94 68 89 64 86 Z" fill="#f59e0b"/>
+  <!-- Bird Body -->
+  <ellipse cx="50" cy="56" rx="34" ry="36" fill="#3b5998"/>
+  <path d="M50 20 C28 20 20 38 20 60 C20 78 32 90 50 90 C68 90 80 78 80 60 C80 38 72 20 50 20 Z" fill="#4a69ad"/>
+  <!-- Belly with Steel Breastplate outline -->
+  <ellipse cx="50" cy="67" rx="22" ry="19" fill="#e2e8f0"/>
+  <path d="M38 62 C44 65 56 65 62 62" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
+  <path d="M42 72 C46 74 54 74 58 72" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
+  <!-- Eyes -->
+  <circle cx="38" cy="44" r="8.5" fill="#ffffff"/>
+  <circle cx="62" cy="44" r="8.5" fill="#ffffff"/>
+  <circle cx="39" cy="45" r="5" fill="#1e293b"/>
+  <circle cx="61" cy="45" r="5" fill="#1e293b"/>
+  <circle cx="37" cy="43" r="2" fill="#ffffff"/>
+  <circle cx="59" cy="43" r="2" fill="#ffffff"/>
+  <!-- Beak -->
+  <path d="M45 50 C45 50 50 47 55 50 C55 50 51 58 50 58 C49 58 45 50 45 50 Z" fill="#f59e0b"/>
+  <path d="M46 50 L54 50" stroke="#d97706" stroke-width="1.2" stroke-linecap="round"/>
+  <!-- Cheeks Blush -->
+  <circle cx="28" cy="51" r="4.5" fill="#f472b6" opacity="0.45"/>
+  <circle cx="72" cy="51" r="4.5" fill="#f472b6" opacity="0.45"/>
+  <!-- Knight Visor Helmet -->
+  <path d="M26 30 C26 12 36 6 50 6 C64 6 74 12 74 30 C66 32 34 32 26 30 Z" fill="#cbd5e1" stroke="#64748b" stroke-width="1.5"/>
+  <!-- Helmet Brow Band -->
+  <path d="M24 28 C34 31 66 31 76 28 L74 34 C64 36 36 36 26 34 Z" fill="#94a3b8" stroke="#475569" stroke-width="1.2"/>
+  <circle cx="50" cy="31" r="2.5" fill="#e2e8f0" stroke="#475569" stroke-width="1"/>
+  <!-- Red Plume Crest on Helmet -->
+  <path d="M48 6 C48 1 54 -2 58 2 C54 3 53 5 53 7 Z" fill="#ef4444"/>
+  <path d="M51 6 C53 0 60 -1 64 4 C58 5 56 6 55 8 Z" fill="#dc2626"/>
+  <path d="M52 7 C55 3 64 2 68 8 C62 8 59 8 56 9 Z" fill="#b91c1c"/>
+  <!-- Knight Shield in left wing -->
+  <g transform="translate(11, 56)">
+    <path d="M1 2 C6 0 14 0 19 2 C19 12 16 20 10 24 C4 20 1 12 1 2 Z" fill="#e2e8f0" stroke="#64748b" stroke-width="1.5"/>
+    <path d="M10 2 L10 23" stroke="#cbd5e1" stroke-width="1"/>
+    <path d="M3 8 L17 8" stroke="#cbd5e1" stroke-width="1"/>
+    <path d="M10 6 L12 11 L10 16 L8 11 Z" fill="#eab308"/>
+  </g>
+</svg>
