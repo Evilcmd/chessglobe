@@ -440,7 +440,7 @@ export const TrainView: React.FC<TrainViewProps> = ({
                 <div className="w-12 h-12 rounded-full bg-[#1b2131] border border-[#2b354b] p-1.5 flex items-center justify-center shadow-md">
                   <img
                     src={getRepertoireMascot(repertoire)}
-                    alt="ChessAtlas Mascot"
+                    alt="ChessGlobe Mascot"
                     className="w-full h-full object-contain"
                   />
                 </div>

@@ -271,7 +271,7 @@ export const LearnView: React.FC<LearnViewProps> = ({
 
   return (
     <div className="h-screen max-h-screen w-screen overflow-hidden bg-[#0d111a] text-slate-100 flex items-center justify-center p-3 sm:p-4 lg:p-6 select-none">
-      {/* Main Container: Board on Left + Single Unified Card on Right (matching ChessAtlas Image 3) */}
+      {/* Main Container: Board on Left + Single Unified Card on Right */}
       <div className="flex flex-col lg:flex-row items-center lg:items-stretch justify-center gap-4 lg:gap-6 w-full max-w-[1550px] h-full max-h-full">
         {/* Left Column: Full-Height Chessboard */}
         <div className="h-full flex-1 min-w-0 max-h-full flex items-center justify-center relative">
@@ -393,7 +393,7 @@ export const LearnView: React.FC<LearnViewProps> = ({
               <div className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0 flex items-center justify-center filter drop-shadow-lg mt-0.5">
                 <img
                   src={getRepertoireMascot(repertoire)}
-                  alt="ChessAtlas Mascot"
+                  alt="ChessGlobe Mascot"
                   className="w-full h-full object-contain"
                 />
               </div>

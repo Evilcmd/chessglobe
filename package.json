@@ -1,7 +1,8 @@
 {
-  "name": "chess-opening-trainer",
+  "name": "chessglobe",
   "private": true,
   "version": "1.0.0",
+  "description": "ChessGlobe - Modern interactive chess opening trainer & repertoire builder with move-by-move master commentary, guided learning, spaced-repetition training, and Stockfish engine analysis.",
   "type": "module",
   "scripts": {
     "dev": "vite",

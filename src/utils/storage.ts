@@ -1,13 +1,27 @@
 import { Repertoire, EngineSettings } from '../types';
 import { getInitialPresets } from './presets';
 
-const STORAGE_KEY = 'chessatlas_repertoires_v2';
-const SETTINGS_KEY = 'chessatlas_engine_settings_v1';
+const STORAGE_KEY = 'chessglobe_repertoires_v1';
+const SETTINGS_KEY = 'chessglobe_engine_settings_v1';
 
 export function loadRepertoires(): Repertoire[] {
   if (typeof window === 'undefined') return [];
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    let raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      // Migrate from any legacy key if present
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.includes('repertoires') && k !== STORAGE_KEY) {
+          raw = localStorage.getItem(k);
+          if (raw) {
+            localStorage.setItem(STORAGE_KEY, raw);
+            break;
+          }
+        }
+      }
+    }
+
     if (!raw) {
       const presets = getInitialPresets();
       saveRepertoires(presets);
@@ -155,7 +169,19 @@ export function loadEngineSettings(): EngineSettings {
   };
   if (typeof window === 'undefined') return defaults;
   try {
-    const raw = localStorage.getItem(SETTINGS_KEY);
+    let raw = localStorage.getItem(SETTINGS_KEY);
+    if (!raw) {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.includes('engine_settings') && k !== SETTINGS_KEY) {
+          raw = localStorage.getItem(k);
+          if (raw) {
+            localStorage.setItem(SETTINGS_KEY, raw);
+            break;
+          }
+        }
+      }
+    }
     if (!raw) return defaults;
     return { ...defaults, ...JSON.parse(raw) };
   } catch (_) {
