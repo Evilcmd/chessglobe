@@ -7,10 +7,19 @@ import {
   Target,
   Layers,
   Trash2,
-  RotateCcw
+  RotateCcw,
+  CheckCircle2,
+  ShieldCheck
 } from 'lucide-react';
 import { Repertoire } from '../../types';
 import { getRepertoireMascot } from '../../utils/mascot';
+
+const DEFAULT_PRESETS_META = [
+  { id: 'rep-jobava-london', name: 'Jobava London System', color: 'White' },
+  { id: 'rep-1d4', name: '1d4', color: 'White' },
+  { id: 'rep-sicilian-kan', name: 'Sicilian Kan', color: 'Black' },
+  { id: 'rep-kings-indian', name: "King's Indian Defense", color: 'Black' }
+];
 
 interface DashboardProps {
   repertoires: Repertoire[];
@@ -37,6 +46,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const whiteRepertoires = repertoires.filter(r => r.color === 'white');
   const blackRepertoires = repertoires.filter(r => r.color === 'black');
 
+  // Identify any missing default presets (by ID or name)
+  const missingDefaults = DEFAULT_PRESETS_META.filter(
+    preset => !repertoires.some(r => r.id === preset.id || r.name.toLowerCase().trim() === preset.name.toLowerCase().trim())
+  );
+
   return (
     <div className="min-h-screen bg-[#131722] text-slate-100 flex flex-col">
       {/* Top Header (matches Image 1) */}
@@ -55,11 +69,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <div className="flex items-center space-x-3.5">
           <button
             onClick={() => setShowRestoreModal(true)}
-            title="Restore 4 Default Openings"
+            title={missingDefaults.length > 0 ? `Restore ${missingDefaults.length} Missing Default Opening${missingDefaults.length > 1 ? 's' : ''}` : "Default Openings Status"}
             className="flex items-center space-x-1.5 text-xs text-slate-400 hover:text-white bg-[#202737] hover:bg-[#283247] px-3 py-2 rounded-xl border border-[#2e374d] transition"
           >
             <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
             <span>Restore Defaults</span>
+            {missingDefaults.length > 0 && (
+              <span className="ml-1 px-1.5 py-0.5 bg-[#e5a93c]/20 text-[#e5a93c] text-[10px] font-bold rounded-md border border-[#e5a93c]/30">
+                +{missingDefaults.length}
+              </span>
+            )}
           </button>
 
           <button
@@ -190,42 +209,99 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {showRestoreModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
           <div className="bg-[#181d2a] border border-[#2e374e] rounded-2xl w-full max-w-md p-6 shadow-2xl text-slate-100 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center space-x-3 text-[#e5a93c] mb-3">
-              <div className="w-10 h-10 rounded-xl bg-[#e5a93c]/15 flex items-center justify-center">
-                <RotateCcw className="w-5 h-5 text-[#e5a93c]" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-white">Restore Default Openings?</h3>
-                <span className="text-xs text-slate-400">Reloads the 4 preloaded repertoires</span>
-              </div>
-            </div>
+            {missingDefaults.length > 0 ? (
+              <>
+                <div className="flex items-center space-x-3 text-[#e5a93c] mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#e5a93c]/15 flex items-center justify-center">
+                    <RotateCcw className="w-5 h-5 text-[#e5a93c]" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-white">Restore Missing Default Openings?</h3>
+                    <span className="text-xs text-slate-400">Recovers deleted default repertoires</span>
+                  </div>
+                </div>
 
-            <p className="text-xs text-slate-300 leading-relaxed mb-4">
-              This will reload the 4 full preset repertoires (<strong className="text-white">Jobava London System</strong>, <strong className="text-white">1. d4 Repertoire</strong>, <strong className="text-white">Sicilian Kan</strong>, and <strong className="text-white">King's Indian Defense</strong>) with their original lines, complete move commentary, and dedicated mascots.
-            </p>
+                <p className="text-xs text-slate-300 leading-relaxed mb-3">
+                  The following {missingDefaults.length === 1 ? 'default opening was' : `${missingDefaults.length} default openings were`} removed and will be added back to your collection:
+                </p>
 
-            <div className="bg-[#121622] border border-[#232b3e] rounded-xl p-3 mb-6 text-xs text-slate-400 flex items-start space-x-2.5">
-              <span className="text-[#e5a93c] text-sm leading-none mt-0.5">💡</span>
-              <span className="leading-relaxed">Any custom openings you created will be replaced by the default repertoire library.</span>
-            </div>
+                <div className="space-y-1.5 mb-4 max-h-40 overflow-y-auto">
+                  {missingDefaults.map(item => (
+                    <div key={item.id} className="flex items-center justify-between bg-[#121622] border border-[#263148] rounded-xl px-3.5 py-2 text-xs">
+                      <span className="font-semibold text-white">{item.name}</span>
+                      <span className="text-[11px] px-2 py-0.5 rounded-full font-medium bg-[#1e2538] text-slate-300 border border-[#2b354d]">
+                        {item.color}
+                      </span>
+                    </div>
+                  ))}
+                </div>
 
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => setShowRestoreModal(false)}
-                className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white rounded-xl hover:bg-[#202737] transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  setShowRestoreModal(false);
-                  onRestoreDefaults();
-                }}
-                className="px-5 py-2 text-xs font-bold text-slate-950 bg-[#e5a93c] hover:bg-[#f3b544] rounded-xl shadow-md transition"
-              >
-                Restore Openings
-              </button>
-            </div>
+                <div className="bg-[#121622] border border-[#232b3e] rounded-xl p-3 mb-6 text-xs text-slate-300 space-y-1.5">
+                  <div className="flex items-center space-x-1.5 text-[#e5a93c] font-semibold text-xs">
+                    <ShieldCheck className="w-4 h-4 text-[#e5a93c]" />
+                    <span>100% Safe & Non-Destructive</span>
+                  </div>
+                  <ul className="text-slate-400 text-[11px] list-disc list-inside space-y-0.5 pl-0.5">
+                    <li>Your other openings will <strong className="text-slate-200">not</strong> be deleted.</li>
+                    <li>Your learning and training progress will <strong className="text-slate-200">not</strong> be reset.</li>
+                    <li>Only the missing default {missingDefaults.length === 1 ? 'opening is' : 'openings are'} added.</li>
+                  </ul>
+                </div>
+
+                <div className="flex justify-end space-x-3">
+                  <button
+                    onClick={() => setShowRestoreModal(false)}
+                    className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white rounded-xl hover:bg-[#202737] transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowRestoreModal(false);
+                      onRestoreDefaults();
+                    }}
+                    className="px-5 py-2 text-xs font-bold text-slate-950 bg-[#e5a93c] hover:bg-[#f3b544] rounded-xl shadow-md transition"
+                  >
+                    Restore {missingDefaults.length === 1 ? 'Opening' : `${missingDefaults.length} Openings`}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center space-x-3 text-emerald-400 mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/15 flex items-center justify-center">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-white">All Default Openings Present</h3>
+                    <span className="text-xs text-slate-400">No default repertoires are missing</span>
+                  </div>
+                </div>
+
+                <p className="text-xs text-slate-300 leading-relaxed mb-4">
+                  All 4 default openings (<strong className="text-white">Jobava London System</strong>, <strong className="text-white">1d4</strong>, <strong className="text-white">Sicilian Kan</strong>, and <strong className="text-white">King's Indian Defense</strong>) are already in your repertoire collection. None have been deleted!
+                </p>
+
+                <div className="bg-[#121622] border border-emerald-500/20 rounded-xl p-3 mb-6 text-xs text-slate-300 space-y-1">
+                  <div className="flex items-center space-x-1.5 text-emerald-400 font-semibold text-xs">
+                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                    <span>Everything Up to Date</span>
+                  </div>
+                  <p className="text-slate-400 text-[11px] leading-relaxed">
+                    Your stored openings, learned lines, and training progress remain completely safe and untouched.
+                  </p>
+                </div>
+
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => setShowRestoreModal(false)}
+                    className="px-5 py-2 text-xs font-semibold text-white bg-[#202737] hover:bg-[#2a3449] border border-[#2e374d] rounded-xl transition shadow-md"
+                  >
+                    Close
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

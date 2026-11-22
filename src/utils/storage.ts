@@ -39,9 +39,25 @@ export function loadRepertoires(): Repertoire[] {
 }
 
 export function restoreDefaultPresets(): Repertoire[] {
+  const current = loadRepertoires();
   const presets = getInitialPresets();
-  saveRepertoires(presets);
-  return presets;
+
+  const existingIds = new Set(current.map(r => r.id));
+  const existingNames = new Set(current.map(r => r.name.toLowerCase().trim()));
+
+  // Only bring back default presets that were deleted / missing
+  const missingPresets = presets.filter(
+    preset => !existingIds.has(preset.id) && !existingNames.has(preset.name.toLowerCase().trim())
+  );
+
+  if (missingPresets.length === 0) {
+    return current;
+  }
+
+  // Append missing default presets without touching any existing openings or resetting progress
+  const updated = [...current, ...missingPresets];
+  saveRepertoires(updated);
+  return updated;
 }
 
 export function saveRepertoires(repertoires: Repertoire[]): void {
