@@ -22,7 +22,148 @@ interface ChessBoardProps {
   evalScore?: string;
   centipawns?: number;
   className?: string;
+  showCapturedPieces?: boolean;
+  topPlayerName?: string;
+  bottomPlayerName?: string;
 }
+
+// Calculate captured pieces and material advantage from FEN
+export interface CapturedState {
+  wP: number;
+  wN: number;
+  wB: number;
+  wR: number;
+  wQ: number;
+  bP: number;
+  bN: number;
+  bB: number;
+  bR: number;
+  bQ: number;
+  whiteAdvantage: number;
+  blackAdvantage: number;
+}
+
+export function calculateCapturedPieces(fen: string): CapturedState {
+  const counts = {
+    P: 0, N: 0, B: 0, R: 0, Q: 0,
+    p: 0, n: 0, b: 0, r: 0, q: 0,
+  };
+
+  const placement = fen.split(' ')[0] || '';
+  for (const ch of placement) {
+    if (ch in counts) {
+      counts[ch as keyof typeof counts]++;
+    }
+  }
+
+  // White pieces captured by Black:
+  const wP = Math.max(0, 8 - counts.P);
+  const wN = Math.max(0, 2 - counts.N);
+  const wB = Math.max(0, 2 - counts.B);
+  const wR = Math.max(0, 2 - counts.R);
+  const wQ = Math.max(0, 1 - counts.Q);
+
+  // Black pieces captured by White:
+  const bP = Math.max(0, 8 - counts.p);
+  const bN = Math.max(0, 2 - counts.n);
+  const bB = Math.max(0, 2 - counts.b);
+  const bR = Math.max(0, 2 - counts.r);
+  const bQ = Math.max(0, 1 - counts.q);
+
+  const whiteMaterial = counts.P * 1 + counts.N * 3 + counts.B * 3 + counts.R * 5 + counts.Q * 9;
+  const blackMaterial = counts.p * 1 + counts.n * 3 + counts.b * 3 + counts.r * 5 + counts.q * 9;
+
+  return {
+    wP, wN, wB, wR, wQ,
+    bP, bN, bB, bR, bQ,
+    whiteAdvantage: Math.max(0, whiteMaterial - blackMaterial),
+    blackAdvantage: Math.max(0, blackMaterial - whiteMaterial),
+  };
+}
+
+interface CapturedItem {
+  pieceKey: string;
+  count: number;
+}
+
+interface CapturedPiecesBarProps {
+  name: string;
+  color: 'w' | 'b';
+  isTurn: boolean;
+  capturedItems: CapturedItem[];
+  materialDiff: number;
+  width?: number | null;
+  isTop: boolean;
+}
+
+const CapturedPiecesBar: React.FC<CapturedPiecesBarProps> = ({
+  name,
+  color,
+  isTurn,
+  capturedItems,
+  materialDiff,
+  width,
+  isTop
+}) => {
+  return (
+    <div
+      style={{ width: width ? `${width}px` : '100%', maxWidth: '100%' }}
+      className={`flex items-center justify-between px-2.5 py-1 bg-[#161c28]/90 border border-[#263043]/85 rounded-xl shadow-sm text-xs flex-shrink-0 transition-all duration-150 h-7 sm:h-8 select-none ${
+        isTop ? 'mb-1.5' : 'mt-1.5'
+      }`}
+    >
+      {/* Left: Player identity & turn dot */}
+      <div className="flex items-center space-x-2 min-w-0">
+        <div
+          className={`w-3 h-3 rounded-full border shadow-xs flex-shrink-0 transition-all ${
+            color === 'w'
+              ? 'bg-slate-100 border-white ring-1 ring-slate-400/40'
+              : 'bg-[#181d28] border-[#384358] ring-1 ring-black/60'
+          } ${isTurn ? 'ring-2 ring-[#e5a93c] scale-110' : ''}`}
+        />
+        <span
+          className={`text-xs font-semibold truncate tracking-tight transition-colors ${
+            isTurn ? 'text-white font-bold' : 'text-slate-400'
+          }`}
+        >
+          {name}
+        </span>
+        {isTurn && (
+          <span className="w-1.5 h-1.5 rounded-full bg-[#e5a93c] animate-pulse flex-shrink-0" title="To move" />
+        )}
+      </div>
+
+      {/* Right: Captured pieces tray & material advantage */}
+      <div className="flex items-center space-x-1.5 flex-shrink-0">
+        <div className="flex items-center space-x-1.5">
+          {capturedItems.map(item => {
+            const PieceComponent = ChessPieces[item.pieceKey];
+            if (!PieceComponent) return null;
+            return (
+              <div key={item.pieceKey} className="flex items-center -space-x-2">
+                {Array.from({ length: item.count }).map((_, idx) => (
+                  <div
+                    key={idx}
+                    className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 drop-shadow-sm select-none"
+                    title={`${item.count} captured`}
+                  >
+                    <PieceComponent className="w-full h-full object-contain" />
+                  </div>
+                ))}
+              </div>
+            );
+          })}
+        </div>
+
+        {materialDiff > 0 && (
+          <span className="text-[11px] font-bold font-mono text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.5 rounded leading-none ml-1.5 shadow-xs">
+            +{materialDiff}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 const RANKS = ['8', '7', '6', '5', '4', '3', '2', '1'];
@@ -38,12 +179,17 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   showEvalBar = false,
   evalScore = '0.0',
   centipawns = 0,
-  className = ''
+  className = '',
+  showCapturedPieces = true,
+  topPlayerName = 'Opponent',
+  bottomPlayerName = 'You'
 }) => {
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
   const [draggedSquare, setDraggedSquare] = useState<string | null>(null);
   const [dragPos, setDragPos] = useState<{ x: number; y: number } | null>(null);
   const boardRef = useRef<HTMLDivElement>(null);
+  const boardContainerRef = useRef<HTMLDivElement>(null);
+  const [boardContainerWidth, setBoardContainerWidth] = useState<number | null>(null);
 
   // Parse position with chess.js
   const chess = useMemo(() => {
@@ -55,6 +201,69 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   }, [fen]);
 
   const isFlipped = orientation === 'black';
+
+  // Measure board container width to size top & bottom captured pieces bar exactly
+  useEffect(() => {
+    if (!boardContainerRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.contentRect.width > 0) {
+          setBoardContainerWidth(Math.round(entry.contentRect.width));
+        }
+      }
+    });
+    observer.observe(boardContainerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  const capturedState = useMemo(() => calculateCapturedPieces(fen), [fen]);
+
+  const topColor: 'w' | 'b' = isFlipped ? 'w' : 'b';
+  const bottomColor: 'w' | 'b' = isFlipped ? 'b' : 'w';
+
+  // For Top player:
+  const topCapturedItems: CapturedItem[] = useMemo(() => {
+    return (topColor === 'b'
+      ? [
+          { pieceKey: 'wP', count: capturedState.wP },
+          { pieceKey: 'wN', count: capturedState.wN },
+          { pieceKey: 'wB', count: capturedState.wB },
+          { pieceKey: 'wR', count: capturedState.wR },
+          { pieceKey: 'wQ', count: capturedState.wQ },
+        ]
+      : [
+          { pieceKey: 'bP', count: capturedState.bP },
+          { pieceKey: 'bN', count: capturedState.bN },
+          { pieceKey: 'bB', count: capturedState.bB },
+          { pieceKey: 'bR', count: capturedState.bR },
+          { pieceKey: 'bQ', count: capturedState.bQ },
+        ]
+    ).filter(i => i.count > 0);
+  }, [topColor, capturedState]);
+
+  const topAdvantage = topColor === 'b' ? capturedState.blackAdvantage : capturedState.whiteAdvantage;
+
+  // For Bottom player:
+  const bottomCapturedItems: CapturedItem[] = useMemo(() => {
+    return (bottomColor === 'w'
+      ? [
+          { pieceKey: 'bP', count: capturedState.bP },
+          { pieceKey: 'bN', count: capturedState.bN },
+          { pieceKey: 'bB', count: capturedState.bB },
+          { pieceKey: 'bR', count: capturedState.bR },
+          { pieceKey: 'bQ', count: capturedState.bQ },
+        ]
+      : [
+          { pieceKey: 'wP', count: capturedState.wP },
+          { pieceKey: 'wN', count: capturedState.wN },
+          { pieceKey: 'wB', count: capturedState.wB },
+          { pieceKey: 'wR', count: capturedState.wR },
+          { pieceKey: 'wQ', count: capturedState.wQ },
+        ]
+    ).filter(i => i.count > 0);
+  }, [bottomColor, capturedState]);
+
+  const bottomAdvantage = bottomColor === 'w' ? capturedState.whiteAdvantage : capturedState.blackAdvantage;
 
   // Files and ranks ordering based on orientation
   const displayFiles = useMemo(() => (isFlipped ? [...FILES].reverse() : FILES), [isFlipped]);
@@ -365,8 +574,26 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   const barTopFillPercent = isFlipped ? whiteAdvantagePercent : 100 - whiteAdvantagePercent;
 
   return (
-    <div className={`flex items-stretch select-none justify-center h-full max-h-full ${className}`}>
-      {/* Eval Bar on the left */}
+    <div className={`flex flex-col items-center justify-center select-none h-full max-h-full ${className}`}>
+      {/* Top Player & Captured Pieces Bar */}
+      {showCapturedPieces && (
+        <CapturedPiecesBar
+          name={topPlayerName}
+          color={topColor}
+          isTurn={chess.turn() === topColor}
+          capturedItems={topCapturedItems}
+          materialDiff={topAdvantage}
+          width={boardContainerWidth}
+          isTop={true}
+        />
+      )}
+
+      {/* Middle Row: Eval Bar + Chessboard Container */}
+      <div
+        ref={boardContainerRef}
+        className="flex items-stretch justify-center flex-1 min-h-0 max-h-full max-w-full relative"
+      >
+        {/* Eval Bar on the left */}
       <div
         className={`transition-all duration-300 ease-in-out overflow-hidden flex flex-col items-center rounded-l-md mr-1.5 shadow-md relative h-full ${
           showEvalBar ? 'w-6 sm:w-7 opacity-100' : 'w-0 opacity-0 pointer-events-none'
@@ -590,7 +817,21 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
             })()}
           </div>
         )}
+        </div>
       </div>
+
+      {/* Bottom Player & Captured Pieces Bar */}
+      {showCapturedPieces && (
+        <CapturedPiecesBar
+          name={bottomPlayerName}
+          color={bottomColor}
+          isTurn={chess.turn() === bottomColor}
+          capturedItems={bottomCapturedItems}
+          materialDiff={bottomAdvantage}
+          width={boardContainerWidth}
+          isTop={false}
+        />
+      )}
     </div>
   );
 };
