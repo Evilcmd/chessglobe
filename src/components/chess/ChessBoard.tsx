@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Chess, Square } from 'chess.js';
 import { ChessPieces } from './pieces';
+import { PieceSilhouettes } from './PieceSilhouette';
 import { sound } from '../../utils/sound';
 
 export interface ArrowData {
@@ -82,7 +83,7 @@ export function calculateCapturedPieces(fen: string): CapturedState {
 }
 
 interface CapturedItem {
-  pieceKey: string;
+  pieceKey: 'P' | 'N' | 'B' | 'R' | 'Q';
   count: number;
 }
 
@@ -135,19 +136,19 @@ const CapturedPiecesBar: React.FC<CapturedPiecesBarProps> = ({
 
       {/* Right: Captured pieces tray & material advantage */}
       <div className="flex items-center space-x-1.5 flex-shrink-0">
-        <div className="flex items-center space-x-1.5">
+        <div className="flex items-center space-x-1">
           {capturedItems.map(item => {
-            const PieceComponent = ChessPieces[item.pieceKey];
+            const PieceComponent = PieceSilhouettes[item.pieceKey];
             if (!PieceComponent) return null;
             return (
-              <div key={item.pieceKey} className="flex items-center -space-x-2">
+              <div key={item.pieceKey} className="flex items-center -space-x-1.5 sm:-space-x-2">
                 {Array.from({ length: item.count }).map((_, idx) => (
                   <div
                     key={idx}
-                    className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 drop-shadow-sm select-none"
+                    className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-slate-300 hover:text-white flex-shrink-0 drop-shadow-sm select-none transition-colors"
                     title={`${item.count} captured`}
                   >
-                    <PieceComponent className="w-full h-full object-contain" />
+                    <PieceComponent className="w-full h-full" />
                   </div>
                 ))}
               </div>
@@ -223,44 +224,44 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
 
   // For Top player:
   const topCapturedItems: CapturedItem[] = useMemo(() => {
-    return (topColor === 'b'
+    const items: CapturedItem[] = topColor === 'b'
       ? [
-          { pieceKey: 'wP', count: capturedState.wP },
-          { pieceKey: 'wN', count: capturedState.wN },
-          { pieceKey: 'wB', count: capturedState.wB },
-          { pieceKey: 'wR', count: capturedState.wR },
-          { pieceKey: 'wQ', count: capturedState.wQ },
+          { pieceKey: 'P', count: capturedState.wP },
+          { pieceKey: 'N', count: capturedState.wN },
+          { pieceKey: 'B', count: capturedState.wB },
+          { pieceKey: 'R', count: capturedState.wR },
+          { pieceKey: 'Q', count: capturedState.wQ },
         ]
       : [
-          { pieceKey: 'bP', count: capturedState.bP },
-          { pieceKey: 'bN', count: capturedState.bN },
-          { pieceKey: 'bB', count: capturedState.bB },
-          { pieceKey: 'bR', count: capturedState.bR },
-          { pieceKey: 'bQ', count: capturedState.bQ },
-        ]
-    ).filter(i => i.count > 0);
+          { pieceKey: 'P', count: capturedState.bP },
+          { pieceKey: 'N', count: capturedState.bN },
+          { pieceKey: 'B', count: capturedState.bB },
+          { pieceKey: 'R', count: capturedState.bR },
+          { pieceKey: 'Q', count: capturedState.bQ },
+        ];
+    return items.filter(i => i.count > 0);
   }, [topColor, capturedState]);
 
   const topAdvantage = topColor === 'b' ? capturedState.blackAdvantage : capturedState.whiteAdvantage;
 
   // For Bottom player:
   const bottomCapturedItems: CapturedItem[] = useMemo(() => {
-    return (bottomColor === 'w'
+    const items: CapturedItem[] = bottomColor === 'w'
       ? [
-          { pieceKey: 'bP', count: capturedState.bP },
-          { pieceKey: 'bN', count: capturedState.bN },
-          { pieceKey: 'bB', count: capturedState.bB },
-          { pieceKey: 'bR', count: capturedState.bR },
-          { pieceKey: 'bQ', count: capturedState.bQ },
+          { pieceKey: 'P', count: capturedState.bP },
+          { pieceKey: 'N', count: capturedState.bN },
+          { pieceKey: 'B', count: capturedState.bB },
+          { pieceKey: 'R', count: capturedState.bR },
+          { pieceKey: 'Q', count: capturedState.bQ },
         ]
       : [
-          { pieceKey: 'wP', count: capturedState.wP },
-          { pieceKey: 'wN', count: capturedState.wN },
-          { pieceKey: 'wB', count: capturedState.wB },
-          { pieceKey: 'wR', count: capturedState.wR },
-          { pieceKey: 'wQ', count: capturedState.wQ },
-        ]
-    ).filter(i => i.count > 0);
+          { pieceKey: 'P', count: capturedState.wP },
+          { pieceKey: 'N', count: capturedState.wN },
+          { pieceKey: 'B', count: capturedState.wB },
+          { pieceKey: 'R', count: capturedState.wR },
+          { pieceKey: 'Q', count: capturedState.wQ },
+        ];
+    return items.filter(i => i.count > 0);
   }, [bottomColor, capturedState]);
 
   const bottomAdvantage = bottomColor === 'w' ? capturedState.whiteAdvantage : capturedState.blackAdvantage;
